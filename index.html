@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LYNK — Move money across Africa in 10 seconds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/index.css" />
+<style>
+  :root {
+    --bg: #FFFFFF; --elev: #FAFAF7; --tint: #F4FBF8;
+    --border: #EEEEEA; --text: #0A0A0A; --muted: #6B6B70; --faint: #A0A0A5;
+    --mint: #00A884; --mint-hover: #008D6F; --mint-tint: #E8F7F2;
+  }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.5; overflow-x: hidden;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 768px) { .container { padding: 0 20px; } }
+
+  /* NAV */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.8); backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms;
+  }
+  nav.top.scrolled { border-bottom-color: var(--border); }
+  nav.top .inner {
+    max-width: 1200px; margin: 0 auto; padding: 16px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  nav.top .links { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
+  nav.top .links a:hover { color: var(--text); transition: color 200ms; }
+  @media (max-width: 768px) {
+    nav.top .links { display: none; }
+    nav.top .inner { padding: 14px 20px; }
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 44px; padding: 0 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; transition: all 200ms cubic-bezier(0.2,0.8,0.2,1);
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--mint); color: #fff; box-shadow: 0 10px 24px -8px rgba(0,168,132,0.45); }
+  .btn-primary:hover { background: var(--mint-hover); transform: translateY(-1px); }
+  .btn-ghost { color: var(--text); }
+  .btn-ghost:hover { color: var(--mint); }
+
+  /* HERO */
+  .hero {
+    position: relative; padding: 140px 0 100px; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 30% 20%, rgba(0,168,132,0.08), transparent 70%),
+      radial-gradient(ellipse 800px 500px at 80% 60%, rgba(0,168,132,0.05), transparent 70%);
+  }
+  .hero .container { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  @media (max-width: 960px) { .hero .container { grid-template-columns: 1fr; gap: 48px; } .hero { padding: 120px 0 60px; } }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; background: var(--mint-tint); color: var(--mint);
+    border-radius: 100px; font-size: 12px; font-weight: 500;
+    margin-bottom: 24px; border: 1px solid var(--mint-tint);
+  }
+  .hero-badge .dot { width: 6px; height: 6px; border-radius: 3px; background: var(--mint); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  h1 { font-size: clamp(40px, 6vw, 68px); font-weight: 700; line-height: 1.05; letter-spacing: -2px; color: var(--text); }
+  h1 .mint-word { color: var(--mint); }
+  .hero-sub { margin-top: 24px; font-size: 18px; color: var(--muted); max-width: 480px; line-height: 1.55; }
+  .hero-cta { margin-top: 36px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .hero-meta { margin-top: 32px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--faint); }
+  .hero-meta .meta-item { display: flex; align-items: center; gap: 6px; }
+  .hero-meta svg { color: var(--mint); }
+
+  /* 3D SCENE CONTAINER */
+  .scene-container {
+    position: relative; width: 100%; aspect-ratio: 1 / 1.05;
+    z-index: 10;
+  }
+  #webgl-hero-container {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1; overflow: hidden; pointer-events: none;
+  }
+
+  /* CSS3D CONTAINER FOR PHONE SCREEN */
+  #css-hero-container {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 2; pointer-events: none;
+  }
+
+  /* PHONE OVERLAY HMTL */
+  .phone-screen-html {
+    width: 320px; height: 680px; background: transparent;
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .phone-screen-inner {
+    width: 100%; height: 100%; border-radius: 42px;
+    background: #fff; position: relative; overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .phone-statusbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 5.4%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.7% 7% 0; z-index: 2;
+    font-size: 13px; font-weight: 600; color: #0A0A0A;
+  }
+  .phone-content {
+    position: absolute; top: 5.4%; left: 0; right: 0; bottom: 0;
+    padding: 6% 6% 4%; display: flex; flex-direction: column;
+  }
+  .pc-title { font-size: 16px; font-weight: 700; text-align: center; color: var(--text); }
+  .pc-sub { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; }
+
+  .viz { position: relative; margin: 8% auto 7%; width: 80%; aspect-ratio: 2.5 / 1; }
+  .viz-avatar {
+    position: absolute; top: 0; width: 32%; aspect-ratio: 1;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 22px;
+  }
+  .viz-avatar.send { left: 0; background: var(--mint-tint); color: var(--mint); border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+  .viz-avatar.recv { right: 0; background: #F4F4F2; color: var(--muted); border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+  .viz-avatar .label {
+    position: absolute; bottom: -25%; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--muted); font-weight: 500; white-space: nowrap;
+  }
+  .viz-path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .viz-path path { stroke: var(--border); stroke-width: 1.5; fill: none; stroke-dasharray: 4 4; }
+  .viz-dot {
+    position: absolute; width: 4%; aspect-ratio: 1; border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 5px rgba(0,168,132,0.2), 0 0 16px 2px rgba(0,168,132,0.5);
+    offset-path: path('M 44 52 Q 130 -30 216 52');
+    animation: travel 4s cubic-bezier(0.4,0,0.6,1) infinite;
+  }
+  @keyframes travel { 0% { offset-distance: 0%; } 100% { offset-distance: 100%; } }
+
+  .pc-rows { display: flex; flex-direction: column; gap: 4%; width: 85%; margin: 0 auto; }
+  .pc-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .pc-row-icon { width: 22px; aspect-ratio: 1; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .pc-row.done .pc-row-icon { background: var(--mint); color: #fff; }
+  .pc-row.active .pc-row-icon { background: var(--mint-tint); border: 2px solid var(--mint); animation: activePulse 1.5s ease-in-out infinite; }
+  @keyframes activePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,168,132,0.4); } 50% { box-shadow: 0 0 0 6px rgba(0,168,132,0); } }
+  .pc-row.pending .pc-row-icon { border: 1.5px solid var(--border); background: #fff; }
+  .pc-row.pending { color: var(--faint); }
+  .pc-ref { margin-top: auto; padding-top: 6%; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--faint); text-align: center; letter-spacing: 1px; }
+
+  /* SECTION VARS */
+  section { padding: 100px 0; position: relative; }
+  @media (max-width: 768px) { section { padding: 64px 0; } }
+  .section-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mint); margin-bottom: 16px; }
+  .section-title { font-size: clamp(32px, 4vw, 48px); font-weight: 700; letter-spacing: -1.2px; line-height: 1.1; max-width: 720px; }
+  .section-sub { margin-top: 16px; font-size: 17px; color: var(--muted); max-width: 560px; line-height: 1.55; }
+
+  /* HOW IT WORKS */
+  .steps { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+  .step {
+    border: 1px solid var(--border); border-radius: 18px; padding: 32px;
+    background: #fff; transition: all 300ms cubic-bezier(0.2,0.8,0.2,1);
+    position: relative; overflow: hidden;
+  }
+  .step:hover { border-color: var(--mint); transform: translateY(-4px); box-shadow: 0 20px 40px -20px rgba(0,168,132,0.25); }
+  .step-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--faint); letter-spacing: 1.5px; margin-bottom: 24px; }
+  .step-illus { height: 140px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; position: relative; background: var(--elev); border-radius: 12px; }
+  .step-scene { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; pointer-events: none; }
+  .step-title { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.55; }
+
+  /* LINKS SHOWCASE */
+  .links-showcase {
+    background: var(--elev); border-radius: 28px; padding: 80px 64px; margin-top: 56px;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center;
+    perspective: 1500px;
+  }
+  @media (max-width: 860px) { .links-showcase { grid-template-columns: 1fr; padding: 48px 28px; } }
+  .links-card-wrap {
+    transform-style: preserve-3d;
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .links-card {
+    background: #fff; border-radius: 18px; padding: 32px; border: 1px solid var(--border);
+    box-shadow: 0 40px 80px -20px rgba(0,168,132,0.15);
+    position: relative; overflow: hidden; transform-style: preserve-3d;
+  }
+  .links-card-light {
+    position: absolute; inset: 0; background: linear-gradient(135deg, transparent, rgba(0,168,132,0.15), transparent);
+    transform: translateX(-100%); pointer-events: none;
+  }
+  .links-card-wrap:hover .links-card-light { animation: pulseSweep 1.5s cubic-bezier(0.2,0.8,0.2,1); }
+  @keyframes pulseSweep { 0% { transform: translateX(-100%); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+
+  .links-card .link-url {
+    background: var(--tint); border-radius: 10px; padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    display: flex; align-items: center; gap: 12px; margin-top: 20px;
+    border: 1px solid rgba(0,168,132,0.2);
+  }
+  .link-url-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .links-feature-list { display: flex; flex-direction: column; gap: 18px; margin-top: 32px; }
+  .links-feature { display: flex; align-items: flex-start; gap: 14px; font-size: 15px; }
+  .links-feature .check {
+    width: 24px; height: 24px; border-radius: 12px; background: var(--mint-tint);
+    color: var(--mint); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+  }
+
+  /* PERSONAS */
+  .personas { margin-top: 56px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 960px) { .personas { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .personas { grid-template-columns: 1fr; } }
+  .persona { padding: 28px; border-radius: 18px; border: 1px solid var(--border); background: #fff; transition: all 300ms; }
+  .persona:hover { border-color: var(--mint); background: var(--tint); }
+  .persona-role { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; color: var(--mint); margin-bottom: 16px; }
+  .persona-quote { font-size: 15px; line-height: 1.55; color: var(--text); }
+  .persona-author { margin-top: 16px; font-size: 13px; color: var(--muted); }
+
+  /* PRICING */
+  .pricing-compare { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .pricing-compare { grid-template-columns: 1fr; } }
+  .price-card { padding: 36px; border-radius: 18px; position: relative; overflow: hidden; }
+  .price-card.ours { background: linear-gradient(135deg, #0A0A0A 0%, #1a2a26 100%); color: #fff; }
+  .price-card.them { background: var(--elev); border: 1px solid var(--border); }
+  .price-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; opacity: 0.7; margin-bottom: 20px; position: relative; z-index: 2; }
+  .price-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 48px; letter-spacing: -1.5px; position: relative; z-index: 2; }
+  .price-card.ours .price-amount { color: var(--mint); }
+  .price-detail { margin-top: 8px; font-size: 14px; opacity: 0.8; position: relative; z-index: 2; }
+  .price-example { margin-top: 28px; padding-top: 20px; border-top: 1px solid currentColor; opacity: 0.9; font-size: 13px; line-height: 1.6; position: relative; z-index: 2; }
+  .price-card.ours .price-example { border-top-color: rgba(255,255,255,0.12); }
+  .price-card.them .price-example { border-top-color: var(--border); opacity: 1; }
+  .price-example .mono { font-size: 14px; }
+  #price-coin-canvas { position: absolute; top: -50px; right: -50px; width: 300px; height: 300px; z-index: 1; opacity: 0.5; pointer-events: none; filter: blur(5px); }
+
+  /* TRUST */
+  .trust {
+    margin-top: 56px; padding: 48px; border: 1px solid var(--border); border-radius: 18px; background: var(--elev);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+  }
+  @media (max-width: 720px) { .trust { grid-template-columns: 1fr; padding: 32px; } }
+  .trust-stat { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 40px; color: var(--mint); letter-spacing: -1px; }
+  .trust-list { display: flex; flex-direction: column; gap: 14px; }
+  .trust-item { font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 12px; }
+  .trust-item .icon { width: 32px; height: 32px; border-radius: 8px; background: #fff; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--mint); flex-shrink: 0; }
+
+  /* FINAL CTA */
+  .final-cta { position: relative; padding: 120px 0; background: linear-gradient(180deg, #fff 0%, var(--tint) 100%); text-align: center; overflow: hidden; }
+  .final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 800px 300px at 50% 50%, rgba(0,168,132,0.08), transparent 70%); pointer-events: none; }
+  .final-cta .container { position: relative; }
+  .waitlist-form { margin: 40px auto 16px; max-width: 440px; display: flex; gap: 8px; }
+  .waitlist-input { flex: 1; height: 48px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--border); background: #fff; outline: none; font-size: 14px; font-family: inherit; color: var(--text); transition: border 200ms; }
+  .waitlist-input:focus { border-color: var(--mint); box-shadow: 0 0 0 4px rgba(0,168,132,0.1); }
+  .waitlist-btn { height: 48px; padding: 0 24px; border-radius: 10px; background: var(--text); color: #fff; font-weight: 500; font-size: 14px; transition: all 200ms; }
+  .waitlist-btn:hover { background: var(--mint); }
+  .waitlist-note { font-size: 12px; color: var(--faint); }
+
+  footer { padding: 48px 0 40px; border-top: 1px solid var(--border); }
+  footer .inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; font-size: 13px; color: var(--muted); }
+  footer .inner a:hover { color: var(--mint); transition: color 200ms; }
+  footer .foot-links { display: flex; gap: 24px; }
+  .logo-mark { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 24px; letter-spacing: -0.8px; color: var(--text); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 0; }
+  .reveal.visible { animation: fadeUp 600ms cubic-bezier(0.2,0.8,0.2,1) forwards; }
+  
+  @keyframes popIn { 0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .success-icon-anim { transform: scale(0); }
+  .success-icon-anim.active { animation: popIn 400ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+</style>
+</head>
+<body>
+
+<nav class="top" id="topNav">
+  <div class="inner">
+    <a href="#" class="logo-mark">LYNK</a>
+    <div class="links">
+      <a href="#how">How it works</a>
+      <a href="#links">Payment Links</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div>
+      <a href="#waitlist" class="btn btn-primary" style="height:38px;padding:0 24px;font-size:13px;border-radius:100px;">Join waitlist</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-copy z-10 block pointer-events-none" style="pointer-events: auto;">
+      <div class="inline-flex items-center px-3 py-1 rounded-full mb-6 border border-[#E8F7F2] bg-[#FAFAF7]">
+        <span class="w-2 h-2 rounded-full mr-2 animate-pulse" style="background: var(--mint); display:inline-block;"></span>
+        <span class="text-[10px] uppercase tracking-widest font-bold mono" style="color: var(--muted)">Live: 1 USD = 765.40 NGN</span>
+      </div>
+      <h1>
+        Send money across Africa in <span class="mint-word">10 seconds.</span>
+      </h1>
+      <p class="hero-sub" style="color: var(--muted);">
+        Transparent fees. Real-time rates. No hidden costs. Experience the future of cross-border payments.
+      </p>
+      <div class="hero-cta flex flex-wrap gap-4 mt-8 w-full max-w-sm">
+        <a href="#waitlist" class="btn btn-primary" style="height:48px;padding:0 24px;font-size:15px;flex:1;border-radius:10px;">Join waitlist</a>
+        <a href="#how" class="btn btn-ghost" style="height:48px;padding:0 24px;font-size:15px;flex:1;background:var(--elev);border:1px solid var(--border);border-radius:10px;">See how it works</a>
+      </div>
+      <p class="mt-4 text-[11px]" style="color: var(--muted)">Join 150,000+ people waiting for early access.</p>
+    </div>
+
+    <div class="scene-container" id="hero-scene">
+      <div id="webgl-hero-container"></div>
+      <div id="css-hero-container"></div>
+      
+      <!-- hidden HTML for the CSS3D phone screen -->
+      <div id="phone-ui" class="phone-screen-html">
+        <div class="phone-screen-inner">
+          <div class="phone-statusbar">
+            <span>9:41</span>
+            <span style="display:flex;gap:4px;align-items:center;">
+              <svg width="14" height="9" viewBox="0 0 16 10"><rect x="0" y="5" width="3" height="5" rx="0.6" fill="#0A0A0A"/><rect x="4" y="3" width="3" height="7" rx="0.6" fill="#0A0A0A"/><rect x="8" y="1" width="3" height="9" rx="0.6" fill="#0A0A0A"/><rect x="12" y="0" width="3" height="10" rx="0.6" fill="#0A0A0A"/></svg>
+              <svg width="20" height="9" viewBox="0 0 22 10"><rect x="0.5" y="0.5" width="19" height="9" rx="2" fill="none" stroke="#0A0A0A" stroke-opacity="0.4"/><rect x="2" y="2" width="16" height="6" rx="1" fill="#0A0A0A"/></svg>
+            </span>
+          </div>
+          <div class="phone-content">
+            <div class="text-xs font-semibold mb-8 text-center" style="color: var(--muted); margin-top:20px;">Sending to Peter Kamau 🇰🇪</div>
+            <div class="flex-1 flex flex-col justify-center items-center" style="flex:1;">
+                <div class="viz" style="margin-bottom:40px;">
+                  <svg class="viz-path" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M 0 16 Q 50 0, 100 16" />
+                  </svg>
+                  <div class="viz-avatar send" style="left:0; top:4px; width:48px;height:48px;">🇳🇬</div>
+                  <div class="viz-avatar recv" style="right:0; top:4px; width:48px;height:48px;background:#F4F4F2;color:inherit;">🇰🇪</div>
+                  <svg class="viz-path" viewBox="0 0 100 20" preserveAspectRatio="none" style="z-index:10; overflow:visible;">
+                    <circle r="4" fill="#00A884">
+                      <animateMotion path="M 0 16 Q 50 0, 100 16" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                  </svg>
+                </div>
+            </div>
+            <div class="pc-rows">
+              <div class="pc-row done">
+                <div class="pc-row-icon">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                Initiating transfer
+              </div>
+              <div class="pc-row active"><div class="pc-row-icon"></div>Converting currencies</div>
+              <div class="pc-row pending"><div class="pc-row-icon"></div>Delivering to Peter</div>
+            </div>
+            <div class="pc-ref">REF: LYNK-NG-KE-84920</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="container">
+    <div class="section-tag">WHY LYNK</div>
+    <h2 class="section-title">What makes LYNK different.</h2>
+    <p class="section-sub">Built to be taken seriously — by our users, by regulators, and by the infrastructure partners who move money with us.</p>
+    
+    <div class="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">10-second settlement</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-relaxed">USDC on Solana handles cross-border settlement in under a second. Local fiat legs take another few seconds. Total delivery time: under 10 seconds, any African country to any other.</p>
+      </div>
+      
+      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Regulated in Rwanda</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Registered with the Rwanda Development Board. Engaging early with the National Bank of Rwanda regulatory sandbox. Compliance-first architecture from day one — AML, KYC, transaction monitoring built into the core, not bolted on.</p>
+      </div>
+      
+      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+        </div>
+        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Transparent unit economics</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-relaxed">A flat 1.5% fee plus $0.99 per transaction. Mid-market FX rate published in real time. No hidden exchange rate spreads. What you see is what your recipient gets.</p>
+      </div>
+
+      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Payment Links — a category first</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Generate a shareable URL that anyone in any country can pay. Sender pays in their currency. Recipient receives in theirs. No app download required. Built for WhatsApp, Instagram bios, invoices, freelance platforms.</p>
+      </div>
+
+      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+        </div>
+        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Provider-agnostic infrastructure</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Built with a provider abstraction layer from the ground up. Integrates with Yellow Card, Kotani Pay, Fonbnk, Paychant, and more. Route each transaction to the best available rail automatically. No single point of failure.</p>
+      </div>
+
+      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Africa-native, not Africa-adapted</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Built in Kigali by Africans who've lived the problem. Launching on the Nigeria-Rwanda-Kenya corridor where we have the deepest user insight. Expanding to Ghana, Tanzania, Uganda, and South Africa within 18 months.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="container">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title">Three steps. Any country. Any currency.</h2>
+    <p class="section-sub">No physical branches, no waiting days, no deciphering fee schedules. Just pick who, how much, and tap send.</p>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <div class="step-illus">
+          <div class="step-scene" id="step1-scene" data-step="1"></div>
+        </div>
+        <div class="step-title">Choose a recipient</div>
+        <div class="step-desc">Pick from your contacts or paste a phone number. Works in 8 countries at launch, more on the way.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <div class="step-illus">
+          <div class="step-scene" id="step2-scene" data-step="2"></div>
+        </div>
+        <div class="step-title">See the exact rate</div>
+        <div class="step-desc">The mid-market rate, our rate, and the fee — side by side, always. No hidden markup buried in the FX.</div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <div class="step-illus">
+          <div class="step-scene" id="step3-scene" data-step="3"></div>
+        </div>
+        <div class="step-title">They receive in seconds</div>
+        <div class="step-desc">Your recipient gets the money in their local currency — directly to their mobile wallet or bank account.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="links" style="background:#fff;">
+  <div class="container">
+    <div class="section-tag">Payment Links</div>
+    <h2 class="section-title">Share a link. Get paid. In any currency.</h2>
+    <p class="section-sub">Your personal LYNK URL. Put it in your invoice, your Instagram bio, your WhatsApp status. Anyone, anywhere, pays in their currency. You receive in yours.</p>
+
+    <div class="links-showcase" id="links-showcase">
+      <div class="links-card-wrap" id="links-card-wrap">
+        <div class="links-card">
+          <div class="links-card-light"></div>
+          <div style="font-family:JetBrains Mono;font-size:11px;letter-spacing:1.5px;color:#00A884;font-weight:600;">PAYMENT REQUEST</div>
+          <div class="mono" style="font-size:38px;font-weight:700;letter-spacing:-1px;color:#0A0A0A;margin-top:14px;">₦50,000</div>
+          <div style="font-size:13px;color:#6B6B70;margin-top:4px;">Design work · Invoice #03</div>
+          <div class="link-url">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00A884" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span class="link-url-text">lynk.africa/pay/chidi/inv-03</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <div style="flex:1;height:40px;border-radius:10px;background:#25D366;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:500;">Share on WhatsApp</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:22px;font-weight:600;letter-spacing:-0.3px;">Your URL. Your terms.</h3>
+        <p style="margin-top:12px;font-size:15px;color:#6B6B70;line-height:1.55;">The first time we saw a friend with a LYNK link in their Instagram bio and watched a client from Lagos pay them into a Nairobi account in eight seconds — that's when we knew this was the feature.</p>
+        <div class="links-feature-list">
+          <div class="links-feature">
+            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div>Any currency in, any currency out — conversion handled automatically at the mid-market rate.</div>
+          </div>
+          <div class="links-feature">
+            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div>Customise the amount, leave it open, or set a time limit. One-off or recurring.</div>
+          </div>
+          <div class="links-feature">
+            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div>No sign-up required to pay. Your client taps the link, enters card or wallet, done.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-tag">Who moves with LYNK</div>
+    <h2 class="section-title">Built for the cross-border life.</h2>
+    <div class="personas">
+      <div class="persona">
+        <div class="persona-role">Freelancer</div>
+        <div class="persona-quote">"Clients in Nairobi pay my LYNK link. Funds hit my Lagos account the same afternoon."</div>
+        <div class="persona-author">Design work · NGN ↔ KES</div>
+      </div>
+      <div class="persona">
+        <div class="persona-role">Student</div>
+        <div class="persona-quote">"My dad sends fees from Accra to my ALU account in Kigali. No more waiting three days for a wire."</div>
+        <div class="persona-author">Tuition · GHS ↔ RWF</div>
+      </div>
+      <div class="persona">
+        <div class="persona-role">Parent</div>
+        <div class="persona-quote">"School fees, allowance, emergency cash — I send it all from Nairobi in under a minute."</div>
+        <div class="persona-author">Family · KES ↔ RWF</div>
+      </div>
+      <div class="persona">
+        <div class="persona-role">Business owner</div>
+        <div class="persona-quote">"Paying a designer in Kampala from Accra used to take a week and cost a fortune. Now it's seconds and fairly priced."</div>
+        <div class="persona-author">Contracting · GHS ↔ UGX</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" style="background:var(--elev);">
+  <div class="container">
+    <div class="section-tag">PRICING</div>
+    <h2 class="section-title">Built for the way Africans actually move money.</h2>
+    <p class="section-sub" style="max-width:620px;">Our pricing adapts to who you are and what you need. Students sending tuition don't pay the same as businesses moving payroll. Institutions moving volume don't pay the same as a freelancer sending one invoice. One fair rate per use case — never a surprise on your receipt.</p>
+    
+    <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white border border-[#EEEEEA] rounded-[20px] p-8 transition-all duration-300 hover:border-[var(--mint)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,168,132,0.2)] flex flex-col text-left">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6 shrink-0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3 class="text-[20px] font-bold text-[var(--text)] tracking-[-0.3px] mb-3">For individuals</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-[1.55] mb-6 flex-1">Send money to family, pay tuition, split bills across borders. Low flat-rate pricing that favors small transfers over big platform fees. No monthly charges. No account minimums. No catch.</p>
+        <a href="#waitlist" class="text-[14px] font-medium text-[var(--mint)] hover:text-[var(--mint-hover)] transition-colors mt-auto border-none no-underline self-start">Learn more &rarr;</a>
+      </div>
+      
+      <div class="bg-white border border-[#EEEEEA] rounded-[20px] p-8 transition-all duration-300 hover:border-[var(--mint)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,168,132,0.2)] flex flex-col text-left">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6 shrink-0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <h3 class="text-[20px] font-bold text-[var(--text)] tracking-[-0.3px] mb-3">For freelancers & businesses</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-[1.55] mb-6 flex-1">Get paid by clients in any African country. Generate payment links that anyone can pay without signing up. Volume pricing kicks in automatically as you grow — the more you move, the less you pay per transfer.</p>
+        <a href="#waitlist" class="text-[14px] font-medium text-[var(--mint)] hover:text-[var(--mint-hover)] transition-colors mt-auto border-none no-underline self-start">Learn more &rarr;</a>
+      </div>
+
+      <div class="bg-white border border-[#EEEEEA] rounded-[20px] p-8 transition-all duration-300 hover:border-[var(--mint)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,168,132,0.2)] flex flex-col text-left">
+        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6 shrink-0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+        </div>
+        <h3 class="text-[20px] font-bold text-[var(--text)] tracking-[-0.3px] mb-3">For institutions</h3>
+        <p class="text-[14px] text-[var(--muted)] leading-[1.55] mb-6 flex-1">Schools, NGOs, and enterprises moving large volumes pay custom rates tailored to your transaction patterns. Dedicated onboarding, institutional dashboards, and reconciliation tools built for finance teams.</p>
+        <a href="#waitlist" class="text-[14px] font-medium text-[var(--mint)] hover:text-[var(--mint-hover)] transition-colors mt-auto border-none no-underline self-start">Learn more &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Calm Footer Strip -->
+    <div class="mt-12 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12">
+      <div class="text-center">
+        <div class="font-mono text-[11px] text-[var(--muted)] tracking-[1.5px] uppercase mb-1">ALWAYS</div>
+        <div class="font-bold text-[15px] text-[var(--text)]">Mid-market exchange rate</div>
+      </div>
+      <div class="hidden md:block w-1 h-1 bg-[var(--mint)] rounded-full"></div>
+      <div class="text-center">
+        <div class="font-mono text-[11px] text-[var(--muted)] tracking-[1.5px] uppercase mb-1">NEVER</div>
+        <div class="font-bold text-[15px] text-[var(--text)]">Hidden FX markups</div>
+      </div>
+      <div class="hidden md:block w-1 h-1 bg-[var(--mint)] rounded-full"></div>
+      <div class="text-center">
+        <div class="font-mono text-[11px] text-[var(--muted)] tracking-[1.5px] uppercase mb-1">PROMISE</div>
+        <div class="font-bold text-[15px] text-[var(--text)]">You see the fee before you send</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="waitlist" class="final-cta py-20">
+  <div class="container text-center max-w-[600px] mx-auto">
+    <h2 class="section-title mx-auto text-center" style="max-width:600px;">Be the first to move money faster.</h2>
+    <p class="section-sub mx-auto text-center mt-4">Join 150,000+ people waiting for early access.</p>
+    
+    <div id="waitlist-container" class="mt-10 mx-auto max-w-[480px]">
+      <form id="waitlist-form" class="flex flex-col sm:flex-row gap-3 relative" onsubmit="event.preventDefault(); submitWaitlist();">
+        <input type="email" id="waitlist-input" placeholder="Enter your email address" class="flex-1 h-12 px-6 rounded-[10px] border border-[var(--border)] bg-white outline-none focus:border-[var(--mint)] focus:ring-4 focus:ring-[rgba(0,168,132,0.1)] text-[15px] transition-all" oninput="checkInput();" />
+        <button type="submit" id="waitlist-submit" class="sm:w-auto h-12 px-6 rounded-[10px] bg-[var(--mint)] text-white font-medium text-[15px] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:bg-[var(--mint-hover)] hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,168,132,0.4)] active:scale-[0.98]" disabled>
+          <span>Join waitlist</span>
+        </button>
+      </form>
+      <div id="waitlist-error" class="hidden text-left mt-3 text-[13px] text-[#E5484D] flex items-center gap-1.5 transition-opacity duration-300 opacity-0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Please enter a valid email address
+      </div>
+      <p id="waitlist-note" class="text-[13px] text-[var(--muted)] mt-5 text-center">No spam. Two emails a year, tops. Unsubscribe any time.</p>
+    </div>
+    
+    <div id="waitlist-success" class="hidden mt-10 mx-auto max-w-[480px] bg-[#E8F7F2] rounded-[14px] p-[20px] text-center transition-opacity duration-300 opacity-0 shadow-[0_10px_30px_-10px_rgba(0,168,132,0.2)]">
+      <div class="w-12 h-12 rounded-full bg-[var(--mint)] text-white flex items-center justify-center mx-auto mb-4 success-icon-anim">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3 class="text-[18px] font-bold text-[var(--text)] mb-2">You're in.</h3>
+      <p class="text-[14px] text-[var(--muted)]">We'll email you when beta opens in your country.</p>
+    </div>
+  </div>
+</section>
+
+<section id="partners" style="padding: 80px 0; border-top: 1px solid var(--mint-tint); border-bottom: 1px solid var(--mint-tint); background: var(--bg);">
+  <div class="container relative z-10" style="max-width: 800px; text-align: center;">
+    <div class="section-tag" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--mint); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:16px;">FOR PARTNERS</div>
+    <h2 class="section-title mx-auto" style="font-size: 28px; font-weight: 700;">Building payment infrastructure for Africa.</h2>
+    <p class="section-sub mx-auto mt-6" style="font-size: 16px; color: #6B6B70; line-height: 1.6;">Are you a payment provider, financial institution, university bursar, or enterprise with cross-border payment volume? We're actively partnering with teams who share our mission of making African money move freely. Let's talk.</p>
+    
+    <div class="mt-12 bg-[var(--mint-tint)] rounded-[14px] p-6 mx-auto max-w-[480px] flex flex-col items-center relative overflow-hidden">
+      <div class="text-[11px] font-bold uppercase tracking-[1.5px] text-[var(--mint)] mono mb-3">PARTNERSHIP INQUIRIES</div>
+      <div class="flex items-center justify-center gap-3 bg-white/50 py-3 px-5 rounded-lg border border-[#00A88422] w-full max-w-[360px] cursor-pointer hover:bg-white transition-colors group" onclick="copyEmail()">
+        <a href="mailto:partnerships@lynkpay.app" class="mono text-[20px] font-medium text-[var(--text)] group-hover:text-[var(--mint)] transition-colors truncate">partnerships@lynkpay.app</a>
+        <button type="button" class="text-[var(--mint)] opacity-60 hover:opacity-100 transition-opacity p-1 bg-white rounded shadow-sm border border-[#00A88422]" aria-label="Copy email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div id="copy-toast" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[var(--text)] text-white text-xs px-3 py-1.5 rounded-[6px] opacity-0 transition-all pointer-events-none translate-y-1">Copied!</div>
+    </div>
+  </div>
+</section>
+
+<footer class="mt-20 border-t border-[var(--border)] flex items-center px-12 py-10 gap-6 flex-wrap">
+  <div class="flex-1 min-w-[280px] p-4 rounded-2xl bg-[var(--elev)] border border-[var(--border)] flex items-center space-x-4">
+    <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
+      <span class="text-xs font-bold" style="color: var(--mint)">01</span>
+    </div>
+    <div>
+      <div class="text-[11px] font-bold uppercase tracking-wide">Enter Amount</div>
+      <div class="text-[11px] text-[var(--muted)]">Select currencies and see rates.</div>
+    </div>
+  </div>
+  <div class="flex-1 min-w-[280px] p-4 rounded-2xl bg-white border border-[var(--border)] flex items-center space-x-4 shadow-sm ring-1 ring-[#00A88411]">
+    <div class="w-12 h-12 rounded-xl bg-[var(--mint-tint)] flex items-center justify-center">
+      <span class="text-xs font-bold" style="color: var(--mint)">02</span>
+    </div>
+    <div>
+      <div class="text-[11px] font-bold uppercase tracking-wide">Instant Swap</div>
+      <div class="text-[11px] text-[var(--muted)]">Funds convert mid-flight instantly.</div>
+    </div>
+  </div>
+  <div class="flex-1 min-w-[280px] p-4 rounded-2xl bg-[var(--elev)] border border-[var(--border)] flex items-center space-x-4">
+    <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
+      <span class="text-xs font-bold" style="color: var(--mint)">03</span>
+    </div>
+    <div>
+      <div class="text-[11px] font-bold uppercase tracking-wide">Settlement</div>
+      <div class="text-[11px] text-[var(--muted)]">Recipient gets local currency directly.</div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" id="threejs-script">
+  import { initThreeScenes } from '/src/three-scene.js';
+  initThreeScenes();
+</script>
+
+<script>
+  // Scrolled nav
+  const topNav = document.getElementById('topNav');
+  window.addEventListener('scroll', () => {
+    topNav.classList.toggle('scrolled', window.scrollY > 8);
+  });
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.15 });
+
+  // Waitlist form interactivity
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('lynk_waitlist_email')) {
+      showSuccessState(false);
+    }
+  });
+
+  function checkInput() {
+    const input = document.getElementById('waitlist-input');
+    const btn = document.getElementById('waitlist-submit');
+    const err = document.getElementById('waitlist-error');
+    if (input && btn) {
+      btn.disabled = input.value.trim() === '';
+      if (err) {
+        err.classList.add('hidden');
+        err.style.opacity = '0';
+      }
+    }
+  }
+
+  function submitWaitlist() {
+    const btn = document.getElementById('waitlist-submit');
+    const input = document.getElementById('waitlist-input');
+    const err = document.getElementById('waitlist-error');
+    
+    if(!btn || btn.disabled) return;
+    
+    const emailValue = input.value.trim();
+    if (!emailValue.includes('@') || !emailValue.includes('.') || emailValue.length < 5) {
+      if (err) {
+        err.classList.remove('hidden');
+        setTimeout(() => err.style.opacity = '1', 10);
+      }
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    input.disabled = true;
+    btn.style.opacity = '0.7';
+    btn.innerHTML = `Joining...`;
+    
+    let isDone = false;
+    const finish = () => {
+      if(isDone) return;
+      isDone = true;
+      localStorage.setItem('lynk_waitlist_email', emailValue);
+      showSuccessState(true);
+    };
+
+    setTimeout(finish, 1500);
+
+    fetch('https://script.google.com/macros/s/AKfycbzDkvr8Sej7qTL4Ar78PS4QErR1Bx_0fwBJ6wIEeP3G2zYuoaU2jzO4X4ineoTlEF3irQ/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailValue, source: 'landing_page' })
+    }).then(() => {
+      finish();
+    }).catch(() => {
+      finish();
+    });
+  }
+
+  function showSuccessState(animate) {
+    const container = document.getElementById('waitlist-container');
+    const success = document.getElementById('waitlist-success');
+    if (!container || !success) return;
+    
+    container.style.display = 'none';
+    success.classList.remove('hidden');
+    
+    if (animate) {
+      setTimeout(() => {
+        success.style.opacity = '1';
+        const icon = success.querySelector('.success-icon-anim');
+        if (icon) icon.classList.add('active');
+      }, 50);
+    } else {
+      success.style.opacity = '1';
+      const icon = success.querySelector('.success-icon-anim');
+      if (icon) {
+        icon.style.transform = 'scale(1)';
+        icon.classList.remove('success-icon-anim'); // Prevent later animation triggers
+      }
+    }
+
+    // Automatically return back to normal after a short delay
+    setTimeout(() => {
+      success.style.opacity = '0';
+      setTimeout(() => {
+        success.classList.add('hidden');
+        container.style.display = 'block';
+        
+        const input = document.getElementById('waitlist-input');
+        const btn = document.getElementById('waitlist-submit');
+        if (input) {
+          input.value = '';
+          input.disabled = false;
+        }
+        if (btn) {
+          btn.innerHTML = `<span>Join waitlist</span>`;
+          btn.style.opacity = '1';
+          btn.disabled = true;
+        }
+        
+        // Remove from local storage so it doesn't stay hidden on reload
+        localStorage.removeItem('lynk_waitlist_email');
+      }, 300);
+    }, 3500);
+  }
+  
+  // Expose checkInput to global scope for inline handlers
+  window.checkInput = checkInput;
+  window.submitWaitlist = submitWaitlist;
+
+  // Partnership block interactivity
+  function copyEmail() {
+    navigator.clipboard.writeText('partnerships@lynkpay.app');
+    const toast = document.getElementById('copy-toast');
+    if (toast) {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translate(-50%, 0)';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, 4px)';
+      }, 2000);
+    }
+  }
+  window.copyEmail = copyEmail;
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.animationDelay = `${i * 100}ms`;
+    io.observe(el);
+  });
+
+  // Payment Links 3D Tilt
+  const linkWrap = document.getElementById('links-card-wrap');
+  const linkShowcase = document.getElementById('links-showcase');
+  if (linkWrap && linkShowcase) {
+    linkShowcase.addEventListener('mousemove', (e) => {
+      const rect = linkShowcase.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      linkWrap.style.transform = `rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateZ(10px)`;
+    });
+    linkShowcase.addEventListener('mouseleave', () => {
+      linkWrap.style.transform = `rotateY(0deg) rotateX(0deg) translateZ(0px)`;
+    });
+  }
+</script>
+</body>
+</html>
