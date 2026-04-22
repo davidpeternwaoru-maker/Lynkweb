@@ -1,839 +1,1056 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LYNK — Move money across Africa in 10 seconds</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/src/index.css" />
-<style>
-  :root {
-    --bg: #FFFFFF; --elev: #FAFAF7; --tint: #F4FBF8;
-    --border: #EEEEEA; --text: #0A0A0A; --muted: #6B6B70; --faint: #A0A0A5;
-    --mint: #00A884; --mint-hover: #008D6F; --mint-tint: #E8F7F2;
-  }
-  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    background: var(--bg); color: var(--text);
-    line-height: 1.5; overflow-x: hidden;
-  }
-  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-  a { color: inherit; text-decoration: none; }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LYNK — A new rail for African money</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ivory: { DEFAULT: '#FFF8F0', soft: '#F5EDE0', raised: '#FFFFFF' },
+            ink: { DEFAULT: '#1A1A1A', body: '#2A2418', muted: '#6B5D4F', faint: '#A89989' },
+            rule: '#E5D5BF',
+            terracotta: { DEFAULT: '#C2532C', soft: 'rgba(194, 83, 44, 0.10)' },
+            teal: { DEFAULT: '#1A4B4F', soft: 'rgba(26, 75, 79, 0.08)' },
+            gold: { DEFAULT: '#D4A04A', soft: 'rgba(212, 160, 74, 0.12)' }
+          },
+          fontFamily: {
+            fraunces: ['Fraunces', 'serif'],
+            inter: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          boxShadow: {
+            'paper': '0 4px 20px rgba(56, 42, 28, 0.08)',
+            'paper-sm': '0 2px 10px rgba(56, 42, 28, 0.05)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --ivory: #FFF8F0;
+      --ivory-soft: #F5EDE0;
+      --ivory-raised: #FFFFFF;
+      --ink: #1A1A1A;
+      --ink-body: #2A2418;
+      --ink-muted: #6B5D4F;
+      --ink-faint: #A89989;
+      --rule: #E5D5BF;
+      --terracotta: #C2532C;
+      --terracotta-soft: rgba(194, 83, 44, 0.10);
+      --teal: #1A4B4F;
+      --teal-soft: rgba(26, 75, 79, 0.08);
+      --gold: #D4A04A;
+      --gold-soft: rgba(212, 160, 74, 0.12);
+    }
+    
+    body {
+      background-color: var(--ivory);
+      color: var(--ink-body);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 768px) { .container { padding: 0 20px; } }
+    /* Typography */
+    h1, h2, h3, .font-fraunces {
+      font-family: 'Fraunces', serif;
+    }
+    .hero-hl {
+      font-size: clamp(44px, 6vw, 76px);
+      font-weight: 500;
+      line-height: 1.0;
+      letter-spacing: -2px;
+      font-variation-settings: "opsz" 144;
+    }
+    .section-title {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 500;
+      line-height: 1.05;
+      letter-spacing: -1px;
+    }
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      font-weight: 600;
+      color: var(--terracotta);
+    }
+    .subtitle {
+      font-size: 19px;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--ink-muted);
+    }
+    
+    /* Decoration */
+    .top-strip {
+      height: 3px;
+      width: 100%;
+      background: repeating-linear-gradient(
+        to right,
+        var(--gold) 0%, var(--gold) 33.3%,
+        var(--terracotta) 33.3%, var(--terracotta) 66.6%,
+        var(--teal) 66.6%, var(--teal) 100%
+      );
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 50;
+    }
+    .motif-strip {
+      height: 3px; width: 80px;
+      background: repeating-linear-gradient(
+        to right,
+        var(--gold) 0%, var(--gold) 33.3%,
+        var(--terracotta) 33.3%, var(--terracotta) 66.6%,
+        var(--teal) 66.6%, var(--teal) 100%
+      );
+      margin-bottom: 24px;
+    }
+    .gold-dot {
+      display: inline-block;
+      width: 4px; height: 4px;
+      background-color: var(--gold);
+      border-radius: 50%;
+    }
+    
+    /* Navigation */
+    nav {
+      height: 72px;
+      background: rgba(255, 248, 240, 0.85);
+      backdrop-filter: blur(16px);
+      transition: border-color 0.2s;
+    }
+    nav.scrolled {
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-link {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink-body);
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--teal); }
+    
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--teal);
+      color: var(--ivory);
+      height: 48px;
+      border-radius: 8px;
+      padding: 0 24px;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.1px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    
+    nav .btn-primary { height: 40px; padding: 0 20px; }
 
-  /* NAV */
-  nav.top {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(255,255,255,0.8); backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid transparent;
-    transition: border-color 200ms;
-  }
-  nav.top.scrolled { border-bottom-color: var(--border); }
-  nav.top .inner {
-    max-width: 1200px; margin: 0 auto; padding: 16px 32px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  nav.top .links { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
-  nav.top .links a:hover { color: var(--text); transition: color 200ms; }
-  @media (max-width: 768px) {
-    nav.top .links { display: none; }
-    nav.top .inner { padding: 14px 20px; }
-  }
+    /* Scene Container */
+    #hero-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .phone-overlay {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    
+    /* Overlays inside phone */
+    .hero-phone-content {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 20;
+    }
 
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    height: 44px; padding: 0 20px; border-radius: 10px;
-    font-size: 14px; font-weight: 500; transition: all 200ms cubic-bezier(0.2,0.8,0.2,1);
-    white-space: nowrap;
-  }
-  .btn-primary { background: var(--mint); color: #fff; box-shadow: 0 10px 24px -8px rgba(0,168,132,0.45); }
-  .btn-primary:hover { background: var(--mint-hover); transform: translateY(-1px); }
-  .btn-ghost { color: var(--text); }
-  .btn-ghost:hover { color: var(--mint); }
-
-  /* HERO */
-  .hero {
-    position: relative; padding: 140px 0 100px; overflow: hidden;
-  }
-  .hero::before {
-    content: ''; position: absolute; inset: 0; z-index: 0;
-    background:
-      radial-gradient(ellipse 600px 400px at 30% 20%, rgba(0,168,132,0.08), transparent 70%),
-      radial-gradient(ellipse 800px 500px at 80% 60%, rgba(0,168,132,0.05), transparent 70%);
-  }
-  .hero .container { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-  @media (max-width: 960px) { .hero .container { grid-template-columns: 1fr; gap: 48px; } .hero { padding: 120px 0 60px; } }
-
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 12px; background: var(--mint-tint); color: var(--mint);
-    border-radius: 100px; font-size: 12px; font-weight: 500;
-    margin-bottom: 24px; border: 1px solid var(--mint-tint);
-  }
-  .hero-badge .dot { width: 6px; height: 6px; border-radius: 3px; background: var(--mint); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-  h1 { font-size: clamp(40px, 6vw, 68px); font-weight: 700; line-height: 1.05; letter-spacing: -2px; color: var(--text); }
-  h1 .mint-word { color: var(--mint); }
-  .hero-sub { margin-top: 24px; font-size: 18px; color: var(--muted); max-width: 480px; line-height: 1.55; }
-  .hero-cta { margin-top: 36px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .hero-meta { margin-top: 32px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--faint); }
-  .hero-meta .meta-item { display: flex; align-items: center; gap: 6px; }
-  .hero-meta svg { color: var(--mint); }
-
-  /* 3D SCENE CONTAINER */
-  .scene-container {
-    position: relative; width: 100%; aspect-ratio: 1 / 1.05;
-    z-index: 10;
-  }
-  #webgl-hero-container {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 1; overflow: hidden; pointer-events: none;
-  }
-
-  /* CSS3D CONTAINER FOR PHONE SCREEN */
-  #css-hero-container {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 2; pointer-events: none;
-  }
-
-  /* PHONE OVERLAY HMTL */
-  .phone-screen-html {
-    width: 320px; height: 680px; background: transparent;
-    opacity: 0; transition: opacity 0.3s ease;
-  }
-  .phone-screen-inner {
-    width: 100%; height: 100%; border-radius: 42px;
-    background: #fff; position: relative; overflow: hidden;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .phone-statusbar {
-    position: absolute; top: 0; left: 0; right: 0; height: 5.4%;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.7% 7% 0; z-index: 2;
-    font-size: 13px; font-weight: 600; color: #0A0A0A;
-  }
-  .phone-content {
-    position: absolute; top: 5.4%; left: 0; right: 0; bottom: 0;
-    padding: 6% 6% 4%; display: flex; flex-direction: column;
-  }
-  .pc-title { font-size: 16px; font-weight: 700; text-align: center; color: var(--text); }
-  .pc-sub { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; }
-
-  .viz { position: relative; margin: 8% auto 7%; width: 80%; aspect-ratio: 2.5 / 1; }
-  .viz-avatar {
-    position: absolute; top: 0; width: 32%; aspect-ratio: 1;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 22px;
-  }
-  .viz-avatar.send { left: 0; background: var(--mint-tint); color: var(--mint); border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-  .viz-avatar.recv { right: 0; background: #F4F4F2; color: var(--muted); border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-  .viz-avatar .label {
-    position: absolute; bottom: -25%; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: var(--muted); font-weight: 500; white-space: nowrap;
-  }
-  .viz-path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .viz-path path { stroke: var(--border); stroke-width: 1.5; fill: none; stroke-dasharray: 4 4; }
-  .viz-dot {
-    position: absolute; width: 4%; aspect-ratio: 1; border-radius: 50%;
-    background: var(--mint);
-    box-shadow: 0 0 0 5px rgba(0,168,132,0.2), 0 0 16px 2px rgba(0,168,132,0.5);
-    offset-path: path('M 44 52 Q 130 -30 216 52');
-    animation: travel 4s cubic-bezier(0.4,0,0.6,1) infinite;
-  }
-  @keyframes travel { 0% { offset-distance: 0%; } 100% { offset-distance: 100%; } }
-
-  .pc-rows { display: flex; flex-direction: column; gap: 4%; width: 85%; margin: 0 auto; }
-  .pc-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
-  .pc-row-icon { width: 22px; aspect-ratio: 1; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .pc-row.done .pc-row-icon { background: var(--mint); color: #fff; }
-  .pc-row.active .pc-row-icon { background: var(--mint-tint); border: 2px solid var(--mint); animation: activePulse 1.5s ease-in-out infinite; }
-  @keyframes activePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,168,132,0.4); } 50% { box-shadow: 0 0 0 6px rgba(0,168,132,0); } }
-  .pc-row.pending .pc-row-icon { border: 1.5px solid var(--border); background: #fff; }
-  .pc-row.pending { color: var(--faint); }
-  .pc-ref { margin-top: auto; padding-top: 6%; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--faint); text-align: center; letter-spacing: 1px; }
-
-  /* SECTION VARS */
-  section { padding: 100px 0; position: relative; }
-  @media (max-width: 768px) { section { padding: 64px 0; } }
-  .section-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mint); margin-bottom: 16px; }
-  .section-title { font-size: clamp(32px, 4vw, 48px); font-weight: 700; letter-spacing: -1.2px; line-height: 1.1; max-width: 720px; }
-  .section-sub { margin-top: 16px; font-size: 17px; color: var(--muted); max-width: 560px; line-height: 1.55; }
-
-  /* HOW IT WORKS */
-  .steps { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
-  .step {
-    border: 1px solid var(--border); border-radius: 18px; padding: 32px;
-    background: #fff; transition: all 300ms cubic-bezier(0.2,0.8,0.2,1);
-    position: relative; overflow: hidden;
-  }
-  .step:hover { border-color: var(--mint); transform: translateY(-4px); box-shadow: 0 20px 40px -20px rgba(0,168,132,0.25); }
-  .step-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--faint); letter-spacing: 1.5px; margin-bottom: 24px; }
-  .step-illus { height: 140px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; position: relative; background: var(--elev); border-radius: 12px; }
-  .step-scene { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; pointer-events: none; }
-  .step-title { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 8px; }
-  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.55; }
-
-  /* LINKS SHOWCASE */
-  .links-showcase {
-    background: var(--elev); border-radius: 28px; padding: 80px 64px; margin-top: 56px;
-    display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center;
-    perspective: 1500px;
-  }
-  @media (max-width: 860px) { .links-showcase { grid-template-columns: 1fr; padding: 48px 28px; } }
-  .links-card-wrap {
-    transform-style: preserve-3d;
-    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .links-card {
-    background: #fff; border-radius: 18px; padding: 32px; border: 1px solid var(--border);
-    box-shadow: 0 40px 80px -20px rgba(0,168,132,0.15);
-    position: relative; overflow: hidden; transform-style: preserve-3d;
-  }
-  .links-card-light {
-    position: absolute; inset: 0; background: linear-gradient(135deg, transparent, rgba(0,168,132,0.15), transparent);
-    transform: translateX(-100%); pointer-events: none;
-  }
-  .links-card-wrap:hover .links-card-light { animation: pulseSweep 1.5s cubic-bezier(0.2,0.8,0.2,1); }
-  @keyframes pulseSweep { 0% { transform: translateX(-100%); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
-
-  .links-card .link-url {
-    background: var(--tint); border-radius: 10px; padding: 14px 16px;
-    font-family: 'JetBrains Mono', monospace; font-size: 14px;
-    display: flex; align-items: center; gap: 12px; margin-top: 20px;
-    border: 1px solid rgba(0,168,132,0.2);
-  }
-  .link-url-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  .links-feature-list { display: flex; flex-direction: column; gap: 18px; margin-top: 32px; }
-  .links-feature { display: flex; align-items: flex-start; gap: 14px; font-size: 15px; }
-  .links-feature .check {
-    width: 24px; height: 24px; border-radius: 12px; background: var(--mint-tint);
-    color: var(--mint); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
-  }
-
-  /* PERSONAS */
-  .personas { margin-top: 56px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  @media (max-width: 960px) { .personas { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .personas { grid-template-columns: 1fr; } }
-  .persona { padding: 28px; border-radius: 18px; border: 1px solid var(--border); background: #fff; transition: all 300ms; }
-  .persona:hover { border-color: var(--mint); background: var(--tint); }
-  .persona-role { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; color: var(--mint); margin-bottom: 16px; }
-  .persona-quote { font-size: 15px; line-height: 1.55; color: var(--text); }
-  .persona-author { margin-top: 16px; font-size: 13px; color: var(--muted); }
-
-  /* PRICING */
-  .pricing-compare { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 720px) { .pricing-compare { grid-template-columns: 1fr; } }
-  .price-card { padding: 36px; border-radius: 18px; position: relative; overflow: hidden; }
-  .price-card.ours { background: linear-gradient(135deg, #0A0A0A 0%, #1a2a26 100%); color: #fff; }
-  .price-card.them { background: var(--elev); border: 1px solid var(--border); }
-  .price-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; opacity: 0.7; margin-bottom: 20px; position: relative; z-index: 2; }
-  .price-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 48px; letter-spacing: -1.5px; position: relative; z-index: 2; }
-  .price-card.ours .price-amount { color: var(--mint); }
-  .price-detail { margin-top: 8px; font-size: 14px; opacity: 0.8; position: relative; z-index: 2; }
-  .price-example { margin-top: 28px; padding-top: 20px; border-top: 1px solid currentColor; opacity: 0.9; font-size: 13px; line-height: 1.6; position: relative; z-index: 2; }
-  .price-card.ours .price-example { border-top-color: rgba(255,255,255,0.12); }
-  .price-card.them .price-example { border-top-color: var(--border); opacity: 1; }
-  .price-example .mono { font-size: 14px; }
-  #price-coin-canvas { position: absolute; top: -50px; right: -50px; width: 300px; height: 300px; z-index: 1; opacity: 0.5; pointer-events: none; filter: blur(5px); }
-
-  /* TRUST */
-  .trust {
-    margin-top: 56px; padding: 48px; border: 1px solid var(--border); border-radius: 18px; background: var(--elev);
-    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
-  }
-  @media (max-width: 720px) { .trust { grid-template-columns: 1fr; padding: 32px; } }
-  .trust-stat { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 40px; color: var(--mint); letter-spacing: -1px; }
-  .trust-list { display: flex; flex-direction: column; gap: 14px; }
-  .trust-item { font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 12px; }
-  .trust-item .icon { width: 32px; height: 32px; border-radius: 8px; background: #fff; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--mint); flex-shrink: 0; }
-
-  /* FINAL CTA */
-  .final-cta { position: relative; padding: 120px 0; background: linear-gradient(180deg, #fff 0%, var(--tint) 100%); text-align: center; overflow: hidden; }
-  .final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 800px 300px at 50% 50%, rgba(0,168,132,0.08), transparent 70%); pointer-events: none; }
-  .final-cta .container { position: relative; }
-  .waitlist-form { margin: 40px auto 16px; max-width: 440px; display: flex; gap: 8px; }
-  .waitlist-input { flex: 1; height: 48px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--border); background: #fff; outline: none; font-size: 14px; font-family: inherit; color: var(--text); transition: border 200ms; }
-  .waitlist-input:focus { border-color: var(--mint); box-shadow: 0 0 0 4px rgba(0,168,132,0.1); }
-  .waitlist-btn { height: 48px; padding: 0 24px; border-radius: 10px; background: var(--text); color: #fff; font-weight: 500; font-size: 14px; transition: all 200ms; }
-  .waitlist-btn:hover { background: var(--mint); }
-  .waitlist-note { font-size: 12px; color: var(--faint); }
-
-  footer { padding: 48px 0 40px; border-top: 1px solid var(--border); }
-  footer .inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; font-size: 13px; color: var(--muted); }
-  footer .inner a:hover { color: var(--mint); transition: color 200ms; }
-  footer .foot-links { display: flex; gap: 24px; }
-  .logo-mark { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 24px; letter-spacing: -0.8px; color: var(--text); }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  .reveal { opacity: 0; }
-  .reveal.visible { animation: fadeUp 600ms cubic-bezier(0.2,0.8,0.2,1) forwards; }
-  
-  @keyframes popIn { 0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
-  .success-icon-anim { transform: scale(0); }
-  .success-icon-anim.active { animation: popIn 400ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-</style>
+    /* Motion */
+    .reveal {
+      opacity: 0;
+      transition: opacity 700ms ease-out;
+    }
+    .reveal.visible { opacity: 1; }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { transition: none; opacity: 1; }
+      * { animation: none !important; transition: none !important; }
+    }
+    
+    /* Floating dots animation */
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .float-dot { animation: floaty 3s ease-in-out infinite; }
+    .float-dot:nth-child(2) { animation-delay: 1s; }
+    .float-dot:nth-child(3) { animation-delay: 2s; }
+    
+    /* Path dot animation */
+    @keyframes travelPathNew {
+      0% { offset-distance: 0%; opacity: 0; }
+      10% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { offset-distance: 100%; opacity: 0; }
+    }
+    .traveling-dot-new {
+      offset-path: path('M 12 20 Q 70 -10 128 20');
+      animation: travelPathNew 4s linear infinite;
+    }
+    
+    @keyframes pulseRing {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    .pulse-ring {
+      animation: pulseRing 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+    }
+    
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.8; }
+    }
+    .ambient-pulse {
+      animation: subtlePulse 6s ease-in-out infinite;
+    }
+  </style>
 </head>
-<body>
+<body class="relative overflow-x-hidden antialiased">
+  <div class="top-strip"></div>
 
-<nav class="top" id="topNav">
-  <div class="inner">
-    <a href="#" class="logo-mark">LYNK</a>
-    <div class="links">
-      <a href="#how">How it works</a>
-      <a href="#links">Payment Links</a>
-      <a href="#pricing">Pricing</a>
+  <!-- NAVIGATION -->
+  <nav id="navbar" class="fixed top-0 w-full z-50 flex items-center px-6 lg:px-12">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <svg width="32" height="22" viewBox="0 0 90 60">
+        <circle cx="18" cy="38" r="9" fill="#1A4B4F"/>
+        <circle cx="72" cy="38" r="9" fill="#1A4B4F"/>
+        <path d="M 18 38 Q 45 0 72 38" stroke="#1A4B4F" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <path d="M 45 18 L 45 47" stroke="#1A4B4F" stroke-width="5.5" stroke-linecap="round"/>
+      </svg>
+      <span class="font-inter font-bold text-[17px] text-inktracking-tight">LYNK</span>
     </div>
-    <div>
-      <a href="#waitlist" class="btn btn-primary" style="height:38px;padding:0 24px;font-size:13px;border-radius:100px;">Join waitlist</a>
+    
+    <div class="hidden md:flex justify-center flex-1 gap-8">
+      <a href="#why-lynk" class="nav-link">Why LYNK</a>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#pricing" class="nav-link">Pricing</a>
+      <a href="#partners" class="nav-link">Partners</a>
     </div>
-  </div>
-</nav>
+    
+    <div class="flex-shrink-0 ml-auto md:ml-0">
+      <a href="#waitlist" class="btn-primary">Join waitlist</a>
+    </div>
+  </nav>
 
-<section class="hero">
-  <div class="container">
-    <div class="hero-copy z-10 block pointer-events-none" style="pointer-events: auto;">
-      <div class="inline-flex items-center px-3 py-1 rounded-full mb-6 border border-[#E8F7F2] bg-[#FAFAF7]">
-        <span class="w-2 h-2 rounded-full mr-2 animate-pulse" style="background: var(--mint); display:inline-block;"></span>
-        <span class="text-[10px] uppercase tracking-widest font-bold mono" style="color: var(--muted)">Live: 1 USD = 765.40 NGN</span>
-      </div>
-      <h1>
-        Send money across Africa in <span class="mint-word">10 seconds.</span>
-      </h1>
-      <p class="hero-sub" style="color: var(--muted);">
-        Transparent fees. Real-time rates. No hidden costs. Experience the future of cross-border payments.
-      </p>
-      <div class="hero-cta flex flex-wrap gap-4 mt-8 w-full max-w-sm">
-        <a href="#waitlist" class="btn btn-primary" style="height:48px;padding:0 24px;font-size:15px;flex:1;border-radius:10px;">Join waitlist</a>
-        <a href="#how" class="btn btn-ghost" style="height:48px;padding:0 24px;font-size:15px;flex:1;background:var(--elev);border:1px solid var(--border);border-radius:10px;">See how it works</a>
-      </div>
-      <p class="mt-4 text-[11px]" style="color: var(--muted)">Join 150,000+ people waiting for early access.</p>
-    </div>
-
-    <div class="scene-container" id="hero-scene">
-      <div id="webgl-hero-container"></div>
-      <div id="css-hero-container"></div>
+  <!-- HERO SECTION -->
+  <section class="relative pt-[160px] pb-[120px] px-6 lg:px-12 max-w-7xl mx-auto min-h-[90vh] flex items-center">
+    <!-- Abstract Topo SVG Behind everything in Right Column -->
+    <div class="absolute right-0 top-0 w-1/2 h-full opacity-30 pointer-events-none hidden lg:block overflow-hidden">
+      <!-- Ambient glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full ambient-pulse" style="background: radial-gradient(circle, var(--gold-soft) 0%, transparent 60%);"></div>
       
-      <!-- hidden HTML for the CSS3D phone screen -->
-      <div id="phone-ui" class="phone-screen-html">
-        <div class="phone-screen-inner">
-          <div class="phone-statusbar">
-            <span>9:41</span>
-            <span style="display:flex;gap:4px;align-items:center;">
-              <svg width="14" height="9" viewBox="0 0 16 10"><rect x="0" y="5" width="3" height="5" rx="0.6" fill="#0A0A0A"/><rect x="4" y="3" width="3" height="7" rx="0.6" fill="#0A0A0A"/><rect x="8" y="1" width="3" height="9" rx="0.6" fill="#0A0A0A"/><rect x="12" y="0" width="3" height="10" rx="0.6" fill="#0A0A0A"/></svg>
-              <svg width="20" height="9" viewBox="0 0 22 10"><rect x="0.5" y="0.5" width="19" height="9" rx="2" fill="none" stroke="#0A0A0A" stroke-opacity="0.4"/><rect x="2" y="2" width="16" height="6" rx="1" fill="#0A0A0A"/></svg>
-            </span>
-          </div>
-          <div class="phone-content">
-            <div class="text-xs font-semibold mb-8 text-center" style="color: var(--muted); margin-top:20px;">Sending to Peter Kamau 🇰🇪</div>
-            <div class="flex-1 flex flex-col justify-center items-center" style="flex:1;">
-                <div class="viz" style="margin-bottom:40px;">
-                  <svg class="viz-path" viewBox="0 0 100 20" preserveAspectRatio="none">
-                    <path d="M 0 16 Q 50 0, 100 16" />
-                  </svg>
-                  <div class="viz-avatar send" style="left:0; top:4px; width:48px;height:48px;">🇳🇬</div>
-                  <div class="viz-avatar recv" style="right:0; top:4px; width:48px;height:48px;background:#F4F4F2;color:inherit;">🇰🇪</div>
-                  <svg class="viz-path" viewBox="0 0 100 20" preserveAspectRatio="none" style="z-index:10; overflow:visible;">
-                    <circle r="4" fill="#00A884">
-                      <animateMotion path="M 0 16 Q 50 0, 100 16" dur="2s" repeatCount="indefinite" />
-                    </circle>
-                  </svg>
-                </div>
+      <!-- Abstract subtle line pattern -->
+      <svg class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] stroke-gold" viewBox="0 0 100 100" fill="none" stroke-width="0.1">
+        <path d="M10,50 Q30,20 50,40 T90,30" opacity="0.5" />
+        <path d="M15,55 Q35,25 55,45 T95,35" opacity="0.4" />
+        <path d="M20,60 Q40,30 60,50 T100,40" opacity="0.3" />
+        <path d="M25,65 Q45,35 65,55 T105,45" opacity="0.2" />
+        <path d="M20,40 Q30,70 60,80 T90,90" opacity="0.5" />
+        <path d="M25,45 Q35,75 65,85 T95,95" opacity="0.4" />
+      </svg>
+    </div>
+
+    <div class="flex flex-col lg:flex-row items-center w-full gap-12 lg:gap-8 z-10">
+      <!-- Left Column -->
+      <div class="w-full lg:w-[45%] flex flex-col items-start">
+        <div class="eyebrow mb-6">CROSS-BORDER &middot; KIGALI, RWANDA</div>
+        <h1 class="hero-hl text-ink mb-6 flex flex-col gap-1">
+          <span class="font-fraunces italic font-medium">For Africa.</span>
+          <span class="font-fraunces font-bold">By Africa.</span>
+          <span class="font-fraunces font-normal text-terracotta relative w-max">
+            In ten seconds.
+            <!-- SVG Underline -->
+            <svg class="absolute -bottom-2 left-0 w-[80%] h-2" viewBox="0 0 100 10" preserveAspectRatio="none">
+              <path d="M0,5 Q50,0 100,8" stroke="var(--gold)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </h1>
+        <p class="subtitle mb-10 max-w-[480px]">
+          LYNK is the payment rail the continent deserves. We move your money between African countries in ten seconds, at fees you can read without a magnifying glass.
+        </p>
+        <div class="flex flex-wrap items-center gap-6">
+          <a href="#waitlist" class="btn-primary" style="height: 48px;">Join waitlist &rarr;</a>
+          <a href="#how-it-works" class="font-inter font-medium text-teal hover:opacity-80 transition-opacity border-b border-teal/30 hover:border-teal pb-0.5">See how it works</a>
+        </div>
+      </div>
+
+      <!-- Right Column (3D Phone) -->
+      <div class="w-full lg:w-[55%] h-[500px] lg:h-[700px] relative" id="hero-3d-container" style="perspective: 1000px; transform-style: preserve-3d;">
+        <!-- Canvas wrapper -->
+        <div id="hero-canvas"></div>
+        
+        <!-- Screen Content Overlay (Positioned by JS) -->
+        <div id="hero-screen-overlay" class="hero-phone-content opacity-0 transition-opacity duration-1000 w-[240px] h-[480px] bg-ivory rounded-[32px] p-4 flex flex-col overflow-hidden ring-[6px] ring-[#1A1A1A] ring-inset" style="background-color: var(--ivory); backface-visibility: hidden;">
+          <!-- Status Bar -->
+          <div class="flex justify-between items-center mb-5 px-1">
+            <div class="font-mono text-[11px] font-medium text-ink">9:41</div>
+            <div class="flex items-center gap-1.5 opacity-80">
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" class="text-ink text-[10px]"><path d="M1 9V6h2.5v3H1zm4.5 0V4h2.5v5h-2.5zM10 9V1h2.5v8H10z"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" class="text-ink text-[10px]"><path d="M7 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM2.8 5.8a6 6 0 018.4 0l1-1A7.5 7.5 0 001.8 4.8l1 1zm-2-2a9 9 0 0112.4 0l1-1A10.5 10.5 0 00.8 2.8l1 1z"/></svg>
+              <svg width="20" height="10" viewBox="0 0 20 10" fill="currentColor" class="text-ink text-[10px]"><path d="M2 1h14c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1H2c-.6 0-1-.4-1-1V2c0-.6.4-1 1-1zm14 7V2H2v6h14zm2-5v4h1V3h-1z"/></svg>
             </div>
-            <div class="pc-rows">
-              <div class="pc-row done">
-                <div class="pc-row-icon">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                Initiating transfer
+          </div>
+
+          <!-- Top Row -->
+          <div class="flex justify-between items-center mb-4 px-1">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-terracotta-soft text-terracotta flex items-center justify-center font-fraunces text-base font-medium">C</div>
+              <div class="flex flex-col">
+                <span class="font-mono text-[9px] text-ink-muted">Good morning,</span>
+                <span class="font-fraunces text-[14px] text-ink">Chidi</span>
               </div>
-              <div class="pc-row active"><div class="pc-row-icon"></div>Converting currencies</div>
-              <div class="pc-row pending"><div class="pc-row-icon"></div>Delivering to Peter</div>
             </div>
-            <div class="pc-ref">REF: LYNK-NG-KE-84920</div>
+            <div class="relative w-5 h-5 flex items-center justify-center opacity-80">
+              <svg width="16" height="18" viewBox="0 0 16 18" fill="none" stroke="currentColor" stroke-width="1.5" class="text-ink"><path d="M8 17a2 2 0 002-2H6a2 2 0 002 2zm6-4v-4a6 6 0 00-5-5.9V2a1 1 0 00-2 0v1.1A6 6 0 003 9v4l-2 2v1h14v-1l-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div class="absolute top-0 right-0.5 w-[5px] h-[5px] bg-terracotta rounded-full"></div>
+            </div>
           </div>
+
+          <!-- Main Card -->
+          <div class="bg-white rounded-[12px] shadow-sm p-4 mb-2 flex-shrink-0 relative z-10">
+            <div class="font-mono text-[9px] text-ink-muted font-semibold mb-2">SENDING TO</div>
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-7 h-7 rounded-full bg-gold-soft text-gold flex items-center justify-center font-fraunces text-[12px] font-medium">P</div>
+              <div class="flex flex-col">
+                <span class="font-inter text-[12px] font-medium text-ink leading-tight">Peter Kamau</span>
+                <div class="flex items-center gap-1 mt-0.5">
+                  <span class="font-inter text-[10px] text-ink-muted">Kenya &middot;</span>
+                  <svg width="10" height="7" viewBox="0 0 10 7" preserveAspectRatio="none"><rect width="10" height="7" fill="#000"/><rect width="10" height="4.6" fill="#D32F2F"/><rect width="10" height="2.3" fill="#006600"/><path d="M3 2h4l-2 3z" fill="#fff"/></svg>
+                </div>
+              </div>
+            </div>
+            
+            <div class="w-full border-t border-rule mb-3"></div>
+            
+            <div class="font-mono text-[9px] text-ink-muted mb-1">AMOUNT</div>
+            <div class="font-mono text-[22px] font-bold text-teal tabular-nums leading-none tracking-tight mb-1">&#8358;50,000</div>
+            <div class="font-mono text-[9px] text-ink-muted">&approx; KES 4,622 at 1 NGN = 0.0924 KES</div>
+          </div>
+
+          <!-- Transfer Visualization -->
+          <div class="flex flex-col items-center justify-center py-2 mb-2">
+            <div class="relative w-[180px] h-[40px] flex justify-between items-center z-0">
+              <div class="w-6 h-6 rounded-full bg-terracotta-soft text-terracotta flex items-center justify-center font-fraunces text-[12px] font-medium z-10">C</div>
+              
+              <!-- Connection Path -->
+              <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[40px] overflow-visible z-0 pointer-events-none">
+                 <svg class="w-full h-full overflow-visible" viewBox="0 0 140 40">
+                   <path d="M 12 20 Q 70 -10 128 20" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="4 4" fill="none" stroke-linecap="round"/>
+                   <circle cx="0" cy="0" r="2.5" fill="var(--terracotta)" class="traveling-dot-new" />
+                 </svg>
+              </div>
+
+              <div class="w-6 h-6 rounded-full bg-gold-soft text-gold flex items-center justify-center font-fraunces text-[12px] font-medium z-10">P</div>
+            </div>
+            <div class="w-[180px] flex justify-between px-1">
+              <span class="font-inter text-[8px] text-ink-muted">Sent</span>
+              <span class="font-inter text-[8px] text-ink-muted">Receiving</span>
+            </div>
+          </div>
+
+          <!-- Status Rows -->
+          <div class="flex flex-col gap-[6px] px-2 flex-grow">
+            <!-- Row 1 -->
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-teal flex items-center justify-center text-white flex-shrink-0">
+                <svg width="6" height="5" viewBox="0 0 6 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 2.5L2.5 4L5 1"/></svg>
+              </div>
+              <span class="font-inter text-[10px] font-medium text-ink leading-none">Initiating transfer</span>
+            </div>
+            <!-- Row 2 -->
+            <div class="flex items-center gap-2">
+              <div class="relative w-2.5 h-2.5 flex-shrink-0">
+                <div class="absolute inset-0 rounded-full border border-teal pulse-ring"></div>
+                <div class="absolute inset-0 rounded-full border border-teal"></div>
+              </div>
+              <span class="font-inter text-[10px] text-ink leading-none">Converting NGN &rarr; KES</span>
+            </div>
+            <!-- Row 3 -->
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full border border-ink-faint flex-shrink-0"></div>
+              <span class="font-inter text-[10px] text-ink-faint leading-none">Delivering to Peter</span>
+            </div>
+          </div>
+
+          <!-- Bottom Ref -->
+          <div class="font-mono text-[8px] text-ink-faint tracking-[2px] text-center mt-auto pb-1 relative z-20">
+            REF&middot;LYNK-A4F2K9
+          </div>
+          
+          <!-- Overlaid Light Glare for 3D effect -->
+          <div id="screen-glare" class="absolute inset-0 pointer-events-none transition-transform duration-75 z-[100] mix-blend-overlay" style="background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.3) 25%, transparent 45%); transform: translateX(-100%);"></div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section id="why">
-  <div class="container">
-    <div class="section-tag">WHY LYNK</div>
-    <h2 class="section-title">What makes LYNK different.</h2>
-    <p class="section-sub">Built to be taken seriously — by our users, by regulators, and by the infrastructure partners who move money with us.</p>
-    
-    <div class="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  <!-- THIN DIVIDER STRIP -->
+  <div class="w-full border-t border-rule"></div>
+  <div class="w-full py-4 px-6 flex justify-center text-center">
+    <div class="font-mono text-[11px] font-medium text-ink-muted tracking-widest flex items-center justify-center flex-wrap gap-4">
+      <span>RWF &times; NGN &times; KES &times; GHS</span>
+      <span class="gold-dot"></span>
+      <span>REGULATED UNDER BNR</span>
+      <span class="gold-dot"></span>
+      <span>PRE-LAUNCH &middot; 2026</span>
+    </div>
+  </div>
+  <div class="w-full border-t border-rule"></div>
+
+  <!-- WHY LYNK -->
+  <section id="why-lynk" class="py-24 lg:py-32 px-6 lg:px-12 max-w-7xl mx-auto reveal">
+    <div class="motif-strip block"></div>
+    <div class="eyebrow mb-6">WHY LYNK</div>
+    <div class="max-w-2xl mb-16">
+      <h2 class="section-title text-ink mb-6">Built to be taken seriously.</h2>
+      <p class="subtitle">By our users, by regulators, and by the infrastructure partners who move money with us.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+      <!-- Item 1 -->
+      <div class="border-t border-rule pt-8">
+        <div class="font-fraunces italic text-[36px] text-terracotta leading-none mb-4">01</div>
+        <h3 class="font-fraunces text-[22px] font-medium mb-3 text-ink">Ten-second settlement</h3>
+        <p class="text-ink-body text-[15px] leading-relaxed">USDC on Solana handles cross-border settlement in under a second. Local fiat legs take another few. Total: under ten seconds, any African country to any other.</p>
+      </div>
+      <!-- Item 2 -->
+      <div class="border-t border-rule pt-8">
+        <div class="font-fraunces italic text-[36px] text-terracotta leading-none mb-4">02</div>
+        <h3 class="font-fraunces text-[22px] font-medium mb-3 text-ink">Regulated in Rwanda</h3>
+        <p class="text-ink-body text-[15px] leading-relaxed">Registered with the Rwanda Development Board. Engaging with the National Bank of Rwanda sandbox. Compliance-first, from day one.</p>
+      </div>
+      <!-- Item 3 -->
+      <div class="border-t border-rule pt-8">
+        <div class="font-fraunces italic text-[36px] text-terracotta leading-none mb-4">03</div>
+        <h3 class="font-fraunces text-[22px] font-medium mb-3 text-ink">Transparent economics</h3>
+        <p class="text-ink-body text-[15px] leading-relaxed">No hidden exchange rate spreads. Mid-market rate published in real time. What you see is what your recipient gets.</p>
+      </div>
+      <!-- Item 4 -->
+      <div class="border-t border-rule pt-8">
+        <div class="font-fraunces italic text-[36px] text-terracotta leading-none mb-4">04</div>
+        <h3 class="font-fraunces text-[22px] font-medium mb-3 text-ink">Payment Links</h3>
+        <p class="text-ink-body text-[15px] leading-relaxed">Generate a shareable URL that anyone can pay. Sender pays in their currency. Recipient receives in theirs. A category first in African fintech.</p>
+      </div>
+      <!-- Item 5 -->
+      <div class="border-t border-rule pt-8">
+        <div class="font-fraunces italic text-[36px] text-terracotta leading-none mb-4">05</div>
+        <h3 class="font-fraunces text-[22px] font-medium mb-3 text-ink">Provider-agnostic rails</h3>
+        <p class="text-ink-body text-[15px] leading-relaxed">Integrates with Yellow Card, Kotani Pay, Fonbnk, and more. No single point of failure. Route each transaction to the best available partner.</p>
+      </div>
+      <!-- Item 6 -->
+      <div class="border-t border-rule pt-8">
+        <div class="font-fraunces italic text-[36px] text-terracotta leading-none mb-4">06</div>
+        <h3 class="font-fraunces text-[22px] font-medium mb-3 text-ink">Africa-native</h3>
+        <p class="text-ink-body text-[15px] leading-relaxed">Built in Kigali by Africans who lived the problem. Launching on the Nigeria-Rwanda-Kenya corridor. Expanding continent-wide within 18 months.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="bg-ivory-soft py-24 lg:py-32 reveal">
+    <div class="px-6 lg:px-12 max-w-7xl mx-auto">
+      <div class="flex flex-col items-center text-center mb-20">
+        <div class="motif-strip block"></div>
+        <div class="eyebrow mb-6">HOW IT WORKS</div>
+        <h2 class="section-title text-ink">Three steps. Ten seconds.</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 relative">
+        <!-- Rule lines for desktop -->
+        <div class="hidden md:block absolute top-0 bottom-0 left-[33.33%] w-px bg-rule"></div>
+        <div class="hidden md:block absolute top-0 bottom-0 left-[66.66%] w-px bg-rule"></div>
+
+        <!-- Step 1 -->
+        <div class="md:pr-12 md:pb-12">
+          <div class="font-mono text-[48px] text-terracotta leading-none mb-6">01</div>
+          <h3 class="font-fraunces text-[24px] text-ink mb-4">You send</h3>
+          <p class="text-ink-body text-[15px] leading-relaxed">Choose recipient, amount, and currency. See the exact fee and rate before you confirm. No surprises.</p>
         </div>
-        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">10-second settlement</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-relaxed">USDC on Solana handles cross-border settlement in under a second. Local fiat legs take another few seconds. Total delivery time: under 10 seconds, any African country to any other.</p>
+
+        <!-- Step 2 -->
+        <div class="md:px-12 md:pb-12">
+          <div class="font-mono text-[48px] text-terracotta leading-none mb-6">02</div>
+          <h3 class="font-fraunces text-[24px] text-ink mb-4">We convert</h3>
+          <p class="text-ink-body text-[15px] leading-relaxed">USDC on Solana settles instantly. Our partners handle the last-mile fiat delivery. All compliant, all tracked.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="md:pl-12 md:pb-12">
+          <div class="font-mono text-[48px] text-terracotta leading-none mb-6">03</div>
+          <h3 class="font-fraunces text-[24px] text-ink mb-4">They receive</h3>
+          <p class="text-ink-body text-[15px] leading-relaxed">Money lands in your recipient's bank or mobile money. Real-time notification. Nothing hidden.</p>
+        </div>
+      </div>
+
+      <div class="mt-20 flex justify-center text-center">
+        <blockquote class="font-fraunces italic text-[26px] text-ink max-w-[720px] leading-snug">
+          "What takes banks three days, we finish before your tea gets cold."
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAYMENT LINKS -->
+  <section class="py-24 lg:py-32 px-6 lg:px-12 max-w-7xl mx-auto reveal">
+    <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+      <div class="w-full lg:w-1/2">
+        <div class="motif-strip block"></div>
+        <div class="eyebrow mb-6">A CATEGORY FIRST</div>
+        <h2 class="section-title text-ink mb-8">Share a link. Get paid.</h2>
+        <div class="space-y-6 text-[16px] text-ink-body leading-relaxed">
+          <p>No more struggling with SWIFT codes or asking clients to download an app. LYNK Payment Links let anyone pay you directly from a simple URL.</p>
+          <p>Send a link via WhatsApp, drop it in your Instagram bio, or attach it to an invoice. Your payer opens it, chooses their local payment method, and checks out instantly.</p>
+          <p>They pay in their local currency. You receive the exact amount in yours. The conversion happens instantly in the background.</p>
+        </div>
       </div>
       
-      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        </div>
-        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Regulated in Rwanda</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Registered with the Rwanda Development Board. Engaging early with the National Bank of Rwanda regulatory sandbox. Compliance-first architecture from day one — AML, KYC, transaction monitoring built into the core, not bolted on.</p>
-      </div>
-      
-      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
-        </div>
-        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Transparent unit economics</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-relaxed">A flat 1.5% fee plus $0.99 per transaction. Mid-market FX rate published in real time. No hidden exchange rate spreads. What you see is what your recipient gets.</p>
-      </div>
-
-      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </div>
-        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Payment Links — a category first</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Generate a shareable URL that anyone in any country can pay. Sender pays in their currency. Recipient receives in theirs. No app download required. Built for WhatsApp, Instagram bios, invoices, freelance platforms.</p>
-      </div>
-
-      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
-        </div>
-        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Provider-agnostic infrastructure</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Built with a provider abstraction layer from the ground up. Integrates with Yellow Card, Kotani Pay, Fonbnk, Paychant, and more. Route each transaction to the best available rail automatically. No single point of failure.</p>
-      </div>
-
-      <div class="bg-white border border-[var(--border)] rounded-[18px] p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_-8px_rgba(0,168,132,0.25)]">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        </div>
-        <h3 class="text-[20px] font-semibold text-[var(--text)] mb-3 leading-snug">Africa-native, not Africa-adapted</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-relaxed">Built in Kigali by Africans who've lived the problem. Launching on the Nigeria-Rwanda-Kenya corridor where we have the deepest user insight. Expanding to Ghana, Tanzania, Uganda, and South Africa within 18 months.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="how">
-  <div class="container">
-    <div class="section-tag">How it works</div>
-    <h2 class="section-title">Three steps. Any country. Any currency.</h2>
-    <p class="section-sub">No physical branches, no waiting days, no deciphering fee schedules. Just pick who, how much, and tap send.</p>
-
-    <div class="steps">
-      <div class="step reveal">
-        <div class="step-num">01</div>
-        <div class="step-illus">
-          <div class="step-scene" id="step1-scene" data-step="1"></div>
-        </div>
-        <div class="step-title">Choose a recipient</div>
-        <div class="step-desc">Pick from your contacts or paste a phone number. Works in 8 countries at launch, more on the way.</div>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">02</div>
-        <div class="step-illus">
-          <div class="step-scene" id="step2-scene" data-step="2"></div>
-        </div>
-        <div class="step-title">See the exact rate</div>
-        <div class="step-desc">The mid-market rate, our rate, and the fee — side by side, always. No hidden markup buried in the FX.</div>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">03</div>
-        <div class="step-illus">
-          <div class="step-scene" id="step3-scene" data-step="3"></div>
-        </div>
-        <div class="step-title">They receive in seconds</div>
-        <div class="step-desc">Your recipient gets the money in their local currency — directly to their mobile wallet or bank account.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="links" style="background:#fff;">
-  <div class="container">
-    <div class="section-tag">Payment Links</div>
-    <h2 class="section-title">Share a link. Get paid. In any currency.</h2>
-    <p class="section-sub">Your personal LYNK URL. Put it in your invoice, your Instagram bio, your WhatsApp status. Anyone, anywhere, pays in their currency. You receive in yours.</p>
-
-    <div class="links-showcase" id="links-showcase">
-      <div class="links-card-wrap" id="links-card-wrap">
-        <div class="links-card">
-          <div class="links-card-light"></div>
-          <div style="font-family:JetBrains Mono;font-size:11px;letter-spacing:1.5px;color:#00A884;font-weight:600;">PAYMENT REQUEST</div>
-          <div class="mono" style="font-size:38px;font-weight:700;letter-spacing:-1px;color:#0A0A0A;margin-top:14px;">₦50,000</div>
-          <div style="font-size:13px;color:#6B6B70;margin-top:4px;">Design work · Invoice #03</div>
-          <div class="link-url">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00A884" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            <span class="link-url-text">lynk.africa/pay/chidi/inv-03</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <div class="w-full lg:w-1/2 flex justify-center relative">
+        <!-- Floating details -->
+        <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
+          <div class="relative w-[380px] h-[300px]">
+             <span class="gold-dot float-dot absolute top-[10%] left-[10%]"></span>
+             <span class="gold-dot float-dot absolute bottom-[20%] right-[15%]"></span>
+             <span class="gold-dot float-dot absolute top-[40%] right-[5%]"></span>
           </div>
-          <div style="display:flex;gap:8px;margin-top:16px;">
-            <div style="flex:1;height:40px;border-radius:10px;background:#25D366;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:500;">Share on WhatsApp</div>
+        </div>
+
+        <!-- The Card -->
+        <div class="bg-ivory-raised border border-gold rounded-[12px] shadow-paper w-[320px] h-[200px] flex flex-col justify-center items-center p-6 transform -rotate-3 z-10 hover:rotate-0 hover:scale-[1.02] transition-transform duration-500 cursor-default">
+          <div class="font-mono text-[11px] font-medium text-ink-muted mb-4 tracking-widest text-center">PAY CHIDI</div>
+          <div class="font-mono text-[28px] font-bold text-teal mb-2 tabular-nums text-center">&#8358;50,000</div>
+          <div class="font-mono text-[13px] text-ink-muted mb-6 text-center">lynk.africa/pay/chidi/inv-03</div>
+          <div class="px-4 py-2 bg-terracotta-soft text-terracotta text-[12px] font-medium rounded-full mt-auto tracking-wide group flex items-center gap-1">
+            Scan or tap <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- PERSONAS -->
+  <section class="py-24 lg:py-32 px-6 lg:px-12 max-w-7xl mx-auto border-t border-rule reveal">
+    <div class="text-center mb-20 flex flex-col items-center">
+      <div class="eyebrow mb-6">WHO LYNK IS FOR</div>
+      <h2 class="section-title text-ink">Built for the way Africans actually live.</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+      <!-- Persona 1 -->
       <div>
-        <h3 style="font-size:22px;font-weight:600;letter-spacing:-0.3px;">Your URL. Your terms.</h3>
-        <p style="margin-top:12px;font-size:15px;color:#6B6B70;line-height:1.55;">The first time we saw a friend with a LYNK link in their Instagram bio and watched a client from Lagos pay them into a Nairobi account in eight seconds — that's when we knew this was the feature.</p>
-        <div class="links-feature-list">
-          <div class="links-feature">
-            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div>Any currency in, any currency out — conversion handled automatically at the mid-market rate.</div>
-          </div>
-          <div class="links-feature">
-            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div>Customise the amount, leave it open, or set a time limit. One-off or recurring.</div>
-          </div>
-          <div class="links-feature">
-            <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div>No sign-up required to pay. Your client taps the link, enters card or wallet, done.</div>
-          </div>
+        <div class="eyebrow mb-4">FREELANCER</div>
+        <p class="font-fraunces italic text-[18px] text-ink mb-4 leading-snug">"My clients are in Lagos and Nairobi. My rent is in Kigali. I needed one tool for all of it."</p>
+        <p class="text-[13px] text-ink-muted">&mdash; Ife, Kigali</p>
+      </div>
+      <!-- Persona 2 -->
+      <div>
+        <div class="eyebrow mb-4">STUDENT</div>
+        <p class="font-fraunces italic text-[18px] text-ink mb-4 leading-snug">"Tuition came from home three days late every time. Once I missed registration. LYNK fixes that."</p>
+        <p class="text-[13px] text-ink-muted">&mdash; Alissa, Kigali</p>
+      </div>
+      <!-- Persona 3 -->
+      <div>
+        <div class="eyebrow mb-4">SMALL BUSINESS</div>
+        <p class="font-fraunces italic text-[18px] text-ink mb-4 leading-snug">"Paying contractors in five countries used to require five bank accounts and a prayer."</p>
+        <p class="text-[13px] text-ink-muted">&mdash; Daniel, Accra</p>
+      </div>
+      <!-- Persona 4 -->
+      <div>
+        <div class="eyebrow mb-4">PARENT</div>
+        <p class="font-fraunces italic text-[18px] text-ink mb-4 leading-snug">"My daughter studies in Rwanda. Sending money used to feel like a full day's work."</p>
+        <p class="text-[13px] text-ink-muted">&mdash; Folake, Lagos</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="bg-ivory-soft py-24 lg:py-32 reveal">
+    <div class="px-6 lg:px-12 max-w-7xl mx-auto">
+      <div class="flex flex-col items-center text-center mb-16 max-w-2xl mx-auto">
+        <div class="eyebrow mb-6">PRICING</div>
+        <h2 class="section-title text-ink mb-6">Fair for the way Africans move money.</h2>
+        <p class="subtitle">Our pricing adapts to who you are and what you need. One fair rate per use case &mdash; never a surprise on your receipt.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16">
+        <!-- Card 1 -->
+        <div class="bg-ivory-raised border border-rule rounded-[8px] p-[36px] hover:border-terracotta hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex flex-col">
+          <div class="font-fraunces italic text-[64px] text-terracotta leading-none mb-6">i</div>
+          <h3 class="font-fraunces text-[22px] font-medium text-ink mb-4">For individuals</h3>
+          <p class="text-[15px] text-ink-body mb-8 flex-1">Send money home to family, split bills with friends, or pay tuition. Low flat fee plus a tiny transparent percentage.</p>
+          <a href="#" class="text-teal font-medium text-[15px] hover:opacity-80 transition-opacity flex items-center gap-1 group w-max">
+            Learn more <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+          </a>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="bg-ivory-raised border border-rule rounded-[8px] p-[36px] hover:border-terracotta hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex flex-col">
+          <div class="font-fraunces italic text-[64px] text-terracotta leading-none mb-6">B</div>
+          <h3 class="font-fraunces text-[22px] font-medium text-ink mb-4">For freelancers & businesses</h3>
+          <p class="text-[15px] text-ink-body mb-8 flex-1">Invoice foreign clients and pay regional contractors. Generate payment links and abstract away FX. Volume-based discounts.</p>
+          <a href="#" class="text-teal font-medium text-[15px] hover:opacity-80 transition-opacity flex items-center gap-1 group w-max">
+            Learn more <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+          </a>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-ivory-raised border border-rule rounded-[8px] p-[36px] hover:border-terracotta hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex flex-col">
+          <div class="font-fraunces italic text-[64px] text-terracotta leading-none mb-6">I</div>
+          <h3 class="font-fraunces text-[22px] font-medium text-ink mb-4">For institutions</h3>
+          <p class="text-[15px] text-ink-body mb-8 flex-1">API access for marketplaces, payroll providers, and universities. Dedicated account management and custom rate negotiation.</p>
+          <a href="#" class="text-teal font-medium text-[15px] hover:opacity-80 transition-opacity flex items-center gap-1 group w-max">
+            Learn more <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex justify-center text-center">
+        <div class="font-mono text-[11px] font-medium text-ink-muted uppercase tracking-widest flex items-center justify-center flex-wrap gap-4 max-w-3xl">
+          <span>ALWAYS mid-market rate</span>
+          <span class="gold-dot"></span>
+          <span>NEVER hidden markups</span>
+          <span class="gold-dot"></span>
+          <span>PROMISE you see the fee before you send</span>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section>
-  <div class="container">
-    <div class="section-tag">Who moves with LYNK</div>
-    <h2 class="section-title">Built for the cross-border life.</h2>
-    <div class="personas">
-      <div class="persona">
-        <div class="persona-role">Freelancer</div>
-        <div class="persona-quote">"Clients in Nairobi pay my LYNK link. Funds hit my Lagos account the same afternoon."</div>
-        <div class="persona-author">Design work · NGN ↔ KES</div>
-      </div>
-      <div class="persona">
-        <div class="persona-role">Student</div>
-        <div class="persona-quote">"My dad sends fees from Accra to my ALU account in Kigali. No more waiting three days for a wire."</div>
-        <div class="persona-author">Tuition · GHS ↔ RWF</div>
-      </div>
-      <div class="persona">
-        <div class="persona-role">Parent</div>
-        <div class="persona-quote">"School fees, allowance, emergency cash — I send it all from Nairobi in under a minute."</div>
-        <div class="persona-author">Family · KES ↔ RWF</div>
-      </div>
-      <div class="persona">
-        <div class="persona-role">Business owner</div>
-        <div class="persona-quote">"Paying a designer in Kampala from Accra used to take a week and cost a fortune. Now it's seconds and fairly priced."</div>
-        <div class="persona-author">Contracting · GHS ↔ UGX</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="pricing" style="background:var(--elev);">
-  <div class="container">
-    <div class="section-tag">PRICING</div>
-    <h2 class="section-title">Built for the way Africans actually move money.</h2>
-    <p class="section-sub" style="max-width:620px;">Our pricing adapts to who you are and what you need. Students sending tuition don't pay the same as businesses moving payroll. Institutions moving volume don't pay the same as a freelancer sending one invoice. One fair rate per use case — never a surprise on your receipt.</p>
+  <!-- TRUST -->
+  <section class="py-32 px-6 lg:px-12 flex flex-col items-center text-center reveal">
+    <div class="font-fraunces text-[120px] text-terracotta leading-none tracking-tighter mb-4" id="trust-counter">0%</div>
+    <div class="font-fraunces italic text-[20px] text-ink mb-3">of surveyed Africans said they'd switch to LYNK</div>
+    <div class="font-mono text-[12px] text-ink-faint">n = 34, across 8 countries</div>
     
-    <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white border border-[#EEEEEA] rounded-[20px] p-8 transition-all duration-300 hover:border-[var(--mint)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,168,132,0.2)] flex flex-col text-left">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6 shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <h3 class="text-[20px] font-bold text-[var(--text)] tracking-[-0.3px] mb-3">For individuals</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-[1.55] mb-6 flex-1">Send money to family, pay tuition, split bills across borders. Low flat-rate pricing that favors small transfers over big platform fees. No monthly charges. No account minimums. No catch.</p>
-        <a href="#waitlist" class="text-[14px] font-medium text-[var(--mint)] hover:text-[var(--mint-hover)] transition-colors mt-auto border-none no-underline self-start">Learn more &rarr;</a>
+    <div class="w-full max-w-[480px] border-t border-rule my-12"></div>
+    
+    <div class="flex flex-col md:flex-row items-center gap-6 md:gap-4 text-[14px] text-ink-body font-inter w-full max-w-5xl justify-center flex-wrap">
+      <div class="flex items-center gap-2">
+        <svg class="text-terracotta" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Registered with the Rwanda Development Board</span>
+      </div>
+      <span class="gold-dot hidden md:inline-block"></span>
+      <div class="flex items-center gap-2">
+        <svg class="text-terracotta" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Operating under BNR sandbox engagement</span>
+      </div>
+      <span class="gold-dot hidden md:inline-block"></span>
+      <div class="flex items-center gap-2">
+        <svg class="text-terracotta" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Built in Kigali. By Africans, for Africans.</span>
+      </div>
+      <span class="gold-dot hidden lg:inline-block"></span>
+      <div class="flex items-center gap-2">
+        <svg class="text-terracotta" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Real-time mid-market rates</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNERSHIPS -->
+  <section id="partners" class="bg-ivory-soft py-24 lg:py-32 px-6 reveal flex justify-center">
+    <div class="max-w-[720px] text-center w-full">
+      <div class="eyebrow mb-6">FOR PARTNERS</div>
+      <h2 class="font-fraunces text-[36px] text-ink mb-6 font-medium">Moving money is a team sport.</h2>
+      <p class="text-[16px] text-ink-body mb-12">Are you a payment provider, financial institution, university bursar, or enterprise with cross-border payment volume? We're actively partnering with teams who share our mission of making African money move freely.</p>
+      
+      <div class="bg-ivory-raised border border-gold rounded-[8px] p-8 max-w-[480px] mx-auto text-center shadow-paper-sm">
+        <div class="font-mono text-[11px] font-bold text-terracotta mb-4 tracking-widest">PARTNERSHIP INQUIRIES</div>
+        <a href="mailto:partnerships@lynkpay.app" class="font-mono text-[22px] text-ink border-b-2 border-gold hover:text-teal transition-colors inline-block pb-1 relative group">
+          partnerships@lynkpay.app
+          <svg class="absolute -right-6 top-1.5 w-[18px] text-ink-muted group-hover:text-teal transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST CTA -->
+  <section id="waitlist" class="py-[140px] px-6 text-center reveal">
+    <div class="max-w-[600px] mx-auto">
+      <div class="eyebrow mb-6">JOIN THE WAITLIST</div>
+      <h2 class="font-fraunces text-[56px] text-ink mb-4 font-medium leading-tight tracking-tight">Be among the first.</h2>
+      <p class="text-[18px] text-ink-muted mb-10">Join the waitlist. We'll email you when beta opens in your country.</p>
+      
+      <!-- Form Container -->
+      <div id="waitlist-container" class="w-full relative">
+        <form id="waitlist-form" class="flex flex-col sm:flex-row gap-3 w-full">
+          <input 
+            type="email" 
+            id="email-input" 
+            required
+            placeholder="you@domain.com"
+            class="flex-1 h-[52px] px-4 rounded-[8px] border-[1.5px] border-rule bg-ivory-raised focus:outline-none focus:border-teal font-mono text-[14px] text-ink placeholder:text-ink-faint shadow-sm transition-colors"
+          />
+          <button 
+            type="submit" 
+            id="submit-btn"
+            class="bg-teal text-white h-[52px] px-6 rounded-[8px] font-inter font-medium text-[15px] hover:opacity-90 transition-opacity flex items-center justify-center shadow-sm"
+          >
+            Join waitlist
+          </button>
+        </form>
+        <div id="error-msg" class="absolute -bottom-7 left-0 w-full text-[13px] text-terracotta hidden text-center md:text-left">Please enter a valid email address</div>
       </div>
       
-      <div class="bg-white border border-[#EEEEEA] rounded-[20px] p-8 transition-all duration-300 hover:border-[var(--mint)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,168,132,0.2)] flex flex-col text-left">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6 shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        </div>
-        <h3 class="text-[20px] font-bold text-[var(--text)] tracking-[-0.3px] mb-3">For freelancers & businesses</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-[1.55] mb-6 flex-1">Get paid by clients in any African country. Generate payment links that anyone can pay without signing up. Volume pricing kicks in automatically as you grow — the more you move, the less you pay per transfer.</p>
-        <a href="#waitlist" class="text-[14px] font-medium text-[var(--mint)] hover:text-[var(--mint-hover)] transition-colors mt-auto border-none no-underline self-start">Learn more &rarr;</a>
+      <!-- Success State (Hidden by default) -->
+      <div id="success-msg" class="hidden flex-col items-center justify-center p-6 border border-rule/50 bg-ivory-soft/50 rounded-[12px]">
+         <div class="flex items-center gap-3">
+           <svg class="text-terracotta w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+           <span class="font-fraunces italic text-[22px] text-teal">You're on the list. We'll be in touch.</span>
+         </div>
       </div>
 
-      <div class="bg-white border border-[#EEEEEA] rounded-[20px] p-8 transition-all duration-300 hover:border-[var(--mint)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,168,132,0.2)] flex flex-col text-left">
-        <div class="w-10 h-10 rounded-[10px] bg-[var(--mint-tint)] text-[var(--mint)] flex items-center justify-center mb-6 shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
-        </div>
-        <h3 class="text-[20px] font-bold text-[var(--text)] tracking-[-0.3px] mb-3">For institutions</h3>
-        <p class="text-[14px] text-[var(--muted)] leading-[1.55] mb-6 flex-1">Schools, NGOs, and enterprises moving large volumes pay custom rates tailored to your transaction patterns. Dedicated onboarding, institutional dashboards, and reconciliation tools built for finance teams.</p>
-        <a href="#waitlist" class="text-[14px] font-medium text-[var(--mint)] hover:text-[var(--mint-hover)] transition-colors mt-auto border-none no-underline self-start">Learn more &rarr;</a>
+      <p class="text-[13px] text-ink-faint mt-8">No spam. Two emails a year, tops.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-rule py-12 px-6 lg:px-12">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8 mb-12">
+      <div class="flex flex-col gap-3">
+        <svg width="24" height="16.5" viewBox="0 0 90 60">
+          <circle cx="18" cy="38" r="9" fill="#2A2418"/>
+          <circle cx="72" cy="38" r="9" fill="#2A2418"/>
+          <path d="M 18 38 Q 45 0 72 38" stroke="#2A2418" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+          <path d="M 45 18 L 45 47" stroke="#2A2418" stroke-width="5.5" stroke-linecap="round"/>
+        </svg>
+        <span class="text-[13px] text-ink-muted">A new rail for African money. Kigali, Rwanda.</span>
+      </div>
+      
+      <div class="flex gap-6 text-[13px] text-ink-muted">
+        <a href="#" class="hover:text-ink transition-colors">Privacy</a>
+        <a href="#" class="hover:text-ink transition-colors">Terms</a>
+        <a href="#" class="hover:text-ink transition-colors">Contact</a>
+      </div>
+      
+      <div class="text-[12px] font-mono text-ink-faint">
+        &copy; 2026 LYNK Technologies
       </div>
     </div>
-
-    <!-- Calm Footer Strip -->
-    <div class="mt-12 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12">
-      <div class="text-center">
-        <div class="font-mono text-[11px] text-[var(--muted)] tracking-[1.5px] uppercase mb-1">ALWAYS</div>
-        <div class="font-bold text-[15px] text-[var(--text)]">Mid-market exchange rate</div>
-      </div>
-      <div class="hidden md:block w-1 h-1 bg-[var(--mint)] rounded-full"></div>
-      <div class="text-center">
-        <div class="font-mono text-[11px] text-[var(--muted)] tracking-[1.5px] uppercase mb-1">NEVER</div>
-        <div class="font-bold text-[15px] text-[var(--text)]">Hidden FX markups</div>
-      </div>
-      <div class="hidden md:block w-1 h-1 bg-[var(--mint)] rounded-full"></div>
-      <div class="text-center">
-        <div class="font-mono text-[11px] text-[var(--muted)] tracking-[1.5px] uppercase mb-1">PROMISE</div>
-        <div class="font-bold text-[15px] text-[var(--text)]">You see the fee before you send</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="waitlist" class="final-cta py-20">
-  <div class="container text-center max-w-[600px] mx-auto">
-    <h2 class="section-title mx-auto text-center" style="max-width:600px;">Be the first to move money faster.</h2>
-    <p class="section-sub mx-auto text-center mt-4">Join 150,000+ people waiting for early access.</p>
     
-    <div id="waitlist-container" class="mt-10 mx-auto max-w-[480px]">
-      <form id="waitlist-form" class="flex flex-col sm:flex-row gap-3 relative" onsubmit="event.preventDefault(); submitWaitlist();">
-        <input type="email" id="waitlist-input" placeholder="Enter your email address" class="flex-1 h-12 px-6 rounded-[10px] border border-[var(--border)] bg-white outline-none focus:border-[var(--mint)] focus:ring-4 focus:ring-[rgba(0,168,132,0.1)] text-[15px] transition-all" oninput="checkInput();" />
-        <button type="submit" id="waitlist-submit" class="sm:w-auto h-12 px-6 rounded-[10px] bg-[var(--mint)] text-white font-medium text-[15px] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:bg-[var(--mint-hover)] hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(0,168,132,0.4)] active:scale-[0.98]" disabled>
-          <span>Join waitlist</span>
-        </button>
-      </form>
-      <div id="waitlist-error" class="hidden text-left mt-3 text-[13px] text-[#E5484D] flex items-center gap-1.5 transition-opacity duration-300 opacity-0">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Please enter a valid email address
-      </div>
-      <p id="waitlist-note" class="text-[13px] text-[var(--muted)] mt-5 text-center">No spam. Two emails a year, tops. Unsubscribe any time.</p>
+    <div class="text-center">
+      <span class="font-fraunces italic text-[14px] text-ink-faint">Built with intention, in Kigali</span>
     </div>
-    
-    <div id="waitlist-success" class="hidden mt-10 mx-auto max-w-[480px] bg-[#E8F7F2] rounded-[14px] p-[20px] text-center transition-opacity duration-300 opacity-0 shadow-[0_10px_30px_-10px_rgba(0,168,132,0.2)]">
-      <div class="w-12 h-12 rounded-full bg-[var(--mint)] text-white flex items-center justify-center mx-auto mb-4 success-icon-anim">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h3 class="text-[18px] font-bold text-[var(--text)] mb-2">You're in.</h3>
-      <p class="text-[14px] text-[var(--muted)]">We'll email you when beta opens in your country.</p>
-    </div>
-  </div>
-</section>
+  </footer>
 
-<section id="partners" style="padding: 80px 0; border-top: 1px solid var(--mint-tint); border-bottom: 1px solid var(--mint-tint); background: var(--bg);">
-  <div class="container relative z-10" style="max-width: 800px; text-align: center;">
-    <div class="section-tag" style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--mint); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:16px;">FOR PARTNERS</div>
-    <h2 class="section-title mx-auto" style="font-size: 28px; font-weight: 700;">Building payment infrastructure for Africa.</h2>
-    <p class="section-sub mx-auto mt-6" style="font-size: 16px; color: #6B6B70; line-height: 1.6;">Are you a payment provider, financial institution, university bursar, or enterprise with cross-border payment volume? We're actively partnering with teams who share our mission of making African money move freely. Let's talk.</p>
-    
-    <div class="mt-12 bg-[var(--mint-tint)] rounded-[14px] p-6 mx-auto max-w-[480px] flex flex-col items-center relative overflow-hidden">
-      <div class="text-[11px] font-bold uppercase tracking-[1.5px] text-[var(--mint)] mono mb-3">PARTNERSHIP INQUIRIES</div>
-      <div class="flex items-center justify-center gap-3 bg-white/50 py-3 px-5 rounded-lg border border-[#00A88422] w-full max-w-[360px] cursor-pointer hover:bg-white transition-colors group" onclick="copyEmail()">
-        <a href="mailto:partnerships@lynkpay.app" class="mono text-[20px] font-medium text-[var(--text)] group-hover:text-[var(--mint)] transition-colors truncate">partnerships@lynkpay.app</a>
-        <button type="button" class="text-[var(--mint)] opacity-60 hover:opacity-100 transition-opacity p-1 bg-white rounded shadow-sm border border-[#00A88422]" aria-label="Copy email">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        </button>
-      </div>
-      <div id="copy-toast" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[var(--text)] text-white text-xs px-3 py-1.5 rounded-[6px] opacity-0 transition-all pointer-events-none translate-y-1">Copied!</div>
-    </div>
-  </div>
-</section>
+  <!-- SCRIPT -->
+  <script type="module">
+    import * as THREE from 'https://esm.sh/three@0.160.0';
+    import { RoomEnvironment } from 'https://esm.sh/three@0.160.0/examples/jsm/environments/RoomEnvironment.js';
 
-<footer class="mt-20 border-t border-[var(--border)] flex items-center px-12 py-10 gap-6 flex-wrap">
-  <div class="flex-1 min-w-[280px] p-4 rounded-2xl bg-[var(--elev)] border border-[var(--border)] flex items-center space-x-4">
-    <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
-      <span class="text-xs font-bold" style="color: var(--mint)">01</span>
-    </div>
-    <div>
-      <div class="text-[11px] font-bold uppercase tracking-wide">Enter Amount</div>
-      <div class="text-[11px] text-[var(--muted)]">Select currencies and see rates.</div>
-    </div>
-  </div>
-  <div class="flex-1 min-w-[280px] p-4 rounded-2xl bg-white border border-[var(--border)] flex items-center space-x-4 shadow-sm ring-1 ring-[#00A88411]">
-    <div class="w-12 h-12 rounded-xl bg-[var(--mint-tint)] flex items-center justify-center">
-      <span class="text-xs font-bold" style="color: var(--mint)">02</span>
-    </div>
-    <div>
-      <div class="text-[11px] font-bold uppercase tracking-wide">Instant Swap</div>
-      <div class="text-[11px] text-[var(--muted)]">Funds convert mid-flight instantly.</div>
-    </div>
-  </div>
-  <div class="flex-1 min-w-[280px] p-4 rounded-2xl bg-[var(--elev)] border border-[var(--border)] flex items-center space-x-4">
-    <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
-      <span class="text-xs font-bold" style="color: var(--mint)">03</span>
-    </div>
-    <div>
-      <div class="text-[11px] font-bold uppercase tracking-wide">Settlement</div>
-      <div class="text-[11px] text-[var(--muted)]">Recipient gets local currency directly.</div>
-    </div>
-  </div>
-</footer>
-
-<script type="module" id="threejs-script">
-  import { initThreeScenes } from '/src/three-scene.js';
-  initThreeScenes();
-</script>
-
-<script>
-  // Scrolled nav
-  const topNav = document.getElementById('topNav');
-  window.addEventListener('scroll', () => {
-    topNav.classList.toggle('scrolled', window.scrollY > 8);
-  });
-
-  // Reveal on scroll
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
-    });
-  }, { threshold: 0.15 });
-
-  // Waitlist form interactivity
-  document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('lynk_waitlist_email')) {
-      showSuccessState(false);
-    }
-  });
-
-  function checkInput() {
-    const input = document.getElementById('waitlist-input');
-    const btn = document.getElementById('waitlist-submit');
-    const err = document.getElementById('waitlist-error');
-    if (input && btn) {
-      btn.disabled = input.value.trim() === '';
-      if (err) {
-        err.classList.add('hidden');
-        err.style.opacity = '0';
-      }
-    }
-  }
-
-  function submitWaitlist() {
-    const btn = document.getElementById('waitlist-submit');
-    const input = document.getElementById('waitlist-input');
-    const err = document.getElementById('waitlist-error');
-    
-    if(!btn || btn.disabled) return;
-    
-    const emailValue = input.value.trim();
-    if (!emailValue.includes('@') || !emailValue.includes('.') || emailValue.length < 5) {
-      if (err) {
-        err.classList.remove('hidden');
-        setTimeout(() => err.style.opacity = '1', 10);
-      }
-      return;
-    }
-
-    // Loading state
-    btn.disabled = true;
-    input.disabled = true;
-    btn.style.opacity = '0.7';
-    btn.innerHTML = `Joining...`;
-    
-    let isDone = false;
-    const finish = () => {
-      if(isDone) return;
-      isDone = true;
-      localStorage.setItem('lynk_waitlist_email', emailValue);
-      showSuccessState(true);
-    };
-
-    setTimeout(finish, 1500);
-
-    fetch('https://script.google.com/macros/s/AKfycbzDkvr8Sej7qTL4Ar78PS4QErR1Bx_0fwBJ6wIEeP3G2zYuoaU2jzO4X4ineoTlEF3irQ/exec', {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailValue, source: 'landing_page' })
-    }).then(() => {
-      finish();
-    }).catch(() => {
-      finish();
-    });
-  }
-
-  function showSuccessState(animate) {
-    const container = document.getElementById('waitlist-container');
-    const success = document.getElementById('waitlist-success');
-    if (!container || !success) return;
-    
-    container.style.display = 'none';
-    success.classList.remove('hidden');
-    
-    if (animate) {
-      setTimeout(() => {
-        success.style.opacity = '1';
-        const icon = success.querySelector('.success-icon-anim');
-        if (icon) icon.classList.add('active');
-      }, 50);
-    } else {
-      success.style.opacity = '1';
-      const icon = success.querySelector('.success-icon-anim');
-      if (icon) {
-        icon.style.transform = 'scale(1)';
-        icon.classList.remove('success-icon-anim'); // Prevent later animation triggers
-      }
-    }
-
-    // Automatically return back to normal after a short delay
-    setTimeout(() => {
-      success.style.opacity = '0';
-      setTimeout(() => {
-        success.classList.add('hidden');
-        container.style.display = 'block';
-        
-        const input = document.getElementById('waitlist-input');
-        const btn = document.getElementById('waitlist-submit');
-        if (input) {
-          input.value = '';
-          input.disabled = false;
+    // --- UI Logic ---
+    document.addEventListener("DOMContentLoaded", () => {
+      const navbar = document.getElementById('navbar');
+      
+      // Scroll nav
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
         }
-        if (btn) {
-          btn.innerHTML = `<span>Join waitlist</span>`;
-          btn.style.opacity = '1';
+      }, { passive: true });
+
+      // Reveal animations
+      const reveals = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.15 });
+      reveals.forEach(el => observer.observe(el));
+
+      // Trust Counter
+      const counterEl = document.getElementById('trust-counter');
+      let counted = false;
+      const countObserver = new IntersectionObserver((entries) => {
+        if(entries[0].isIntersecting && !counted) {
+          counted = true;
+          let startTime = null;
+          const duration = 1400;
+          const end = 85;
+          const easeOut = t => 1 - Math.pow(1 - t, 3);
+          
+          const step = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const value = Math.floor(easeOut(progress) * end);
+            counterEl.textContent = value + '%';
+            if (progress < 1) {
+              window.requestAnimationFrame(step);
+            }
+          };
+          window.requestAnimationFrame(step);
+        }
+      }, { threshold: 0.5 });
+      if(counterEl) countObserver.observe(counterEl);
+
+      // Waitlist Form Logic
+      const form = document.getElementById('waitlist-form');
+      const input = document.getElementById('email-input');
+      const btn = document.getElementById('submit-btn');
+      const errorMsg = document.getElementById('error-msg');
+      const container = document.getElementById('waitlist-container');
+      const successMsg = document.getElementById('success-msg');
+
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDkvr8Sej7qTL4Ar78PS4QErR1Bx_0fwBJ6wIEeP3G2zYuoaU2jzO4X4ineoTlEF3irQ/exec';
+
+      if (localStorage.getItem('lynk_waitlist_email')) {
+        container.classList.add('hidden');
+        successMsg.classList.remove('hidden');
+        successMsg.classList.add('flex');
+      }
+
+      if(form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          errorMsg.classList.add('hidden');
+          const email = input.value.trim();
+          
+          if (!email.includes('@') || !email.includes('.') || email.length < 5) {
+            errorMsg.classList.remove('hidden');
+            return;
+          }
+
           btn.disabled = true;
-        }
+          btn.textContent = 'Joining...';
+          btn.style.opacity = '0.7';
+
+          fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, source: "landing_page" })
+          })
+          .then(() => {
+            localStorage.setItem('lynk_waitlist_email', email);
+            container.classList.add('hidden');
+            successMsg.classList.remove('hidden');
+            successMsg.classList.add('flex');
+          })
+          .catch(err => {
+            btn.disabled = false;
+            btn.textContent = 'Join waitlist';
+            btn.style.opacity = '1';
+            errorMsg.textContent = 'Something went wrong. Please try again.';
+            errorMsg.classList.remove('hidden');
+          });
+        });
+      }
+    });
+
+    // --- Three.js Hero Scene ---
+    const container = document.getElementById('hero-canvas');
+    if(container) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      camera.position.z = 24;
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+      
+      container.appendChild(renderer.domElement);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xfff8f0, 0.4);
+      const dirLight = new THREE.DirectionalLight(0xffe4b5, 1.5); // Warm color from upper-left
+      dirLight.position.set(-5, 10, 8);
+      const fillLight = new THREE.DirectionalLight(0xe6f2ff, 0.5); // Cool color from lower-right
+      fillLight.position.set(5, -5, 8);
+      const rimLight = new THREE.DirectionalLight(0xc2532c, 1.0); // Terracotta tint from behind
+      rimLight.position.set(-5, 5, -8);
+      scene.add(ambientLight, dirLight, fillLight, rimLight);
+
+      // Phone Geometry
+      const width = 8.5;
+      const height = 17;
+      const radius = 1.6;
+      
+      const shape = new THREE.Shape();
+      shape.moveTo(0, height/2 - radius);
+      shape.quadraticCurveTo(0, height/2, radius, height/2);
+      shape.lineTo(width - radius, height/2);
+      shape.quadraticCurveTo(width, height/2, width, height/2 - radius);
+      shape.lineTo(width, -height/2 + radius);
+      shape.quadraticCurveTo(width, -height/2, width - radius, -height/2);
+      shape.lineTo(radius, -height/2);
+      shape.quadraticCurveTo(0, -height/2, 0, -height/2 + radius);
+
+      const extrudeSettings = { depth: 1.2, bevelEnabled: true, bevelSegments: 8, steps: 2, bevelSize: 0.25, bevelThickness: 0.25 };
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      
+      // Center geometry
+      geometry.computeBoundingBox();
+      const centerOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+      geometry.translate(centerOffset, 0, -0.3);
+
+      // Warm Graphite Metallic material
+      const bodyMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x1A1A1A,
+        roughness: 0.4,
+        metalness: 0.8,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+        reflectivity: 0.5
+      });
+
+      // Phone screen glass material
+      const glassMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x1A1A1A,
+        transmission: 0.1,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.05,
+        ior: 1.5
+      });
+
+      const phone = new THREE.Mesh(geometry, [glassMaterial, bodyMaterial]);
+      phone.rotation.set(0, 0, 0); // 0 degree base
+      scene.add(phone);
+      
+      // Screen Overlay matching 3D Phone position
+      const overlay = document.getElementById('hero-screen-overlay');
+      const glare = document.getElementById('screen-glare');
+
+      const targetRotation = new THREE.Euler(0, 0, 0);
+      const targetPos = new THREE.Vector3(0, 0, 0);
+      let targetScale = 0.95;
+      let mouseX = 0;
+      let mouseY = 0;
+      let isHovering = false;
+
+      // Mouse tracking
+      const heroSection = document.getElementById('hero-3d-container');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      if (!prefersReducedMotion && heroSection) {
+        heroSection.addEventListener('mousemove', (e) => {
+          isHovering = true;
+          const rect = heroSection.getBoundingClientRect();
+          mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        });
+
+        heroSection.addEventListener('mouseleave', () => {
+          isHovering = false;
+          mouseX = 0;
+          mouseY = 0;
+        });
+      }
+
+      const animate = (time) => {
+        requestAnimationFrame(animate);
         
-        // Remove from local storage so it doesn't stay hidden on reload
-        localStorage.removeItem('lynk_waitlist_email');
-      }, 300);
-    }, 3500);
-  }
-  
-  // Expose checkInput to global scope for inline handlers
-  window.checkInput = checkInput;
-  window.submitWaitlist = submitWaitlist;
+        if (!prefersReducedMotion) {
+          const t = time * 0.001;
+          
+          if (isHovering) {
+            // Interactive state
+            targetRotation.y = mouseX * 0.45; // Increase rotation for better 3D reveal
+            targetRotation.x = -mouseY * 0.25;
+            targetPos.y = Math.sin(t) * 1.5;
+            targetScale = 1.05; // Pop up on hover
+            
+            if (glare) {
+               glare.style.transform = `translateX(${mouseX * 150}%)`;
+            }
+            
+            // Smoother damping for luxury feel
+            phone.rotation.y += (targetRotation.y - phone.rotation.y) * 0.08;
+            phone.rotation.x += (targetRotation.x - phone.rotation.x) * 0.08;
+            phone.position.y += (targetPos.y - phone.position.y) * 0.08;
+            phone.scale.setScalar(phone.scale.x + (targetScale - phone.scale.x) * 0.08);
+          } else {
+            // Ambient breathing state
+            targetRotation.y = Math.sin(t * (Math.PI * 2 / 12)) * 0.25; // Broad ambient rotation to show off 3D geometry
+            targetRotation.x = 0;
+            targetPos.y = Math.sin(t) * 3;
+            targetScale = 0.95;
+            
+            if (glare) {
+               glare.style.transform = `translateX(-100%)`;
+            }
+            
+            // Ease back slowly
+            phone.rotation.y += (targetRotation.y - phone.rotation.y) * 0.04;
+            phone.rotation.x += (targetRotation.x - phone.rotation.x) * 0.04;
+            phone.position.y += (targetPos.y - phone.position.y) * 0.04;
+            phone.scale.setScalar(phone.scale.x + (targetScale - phone.scale.x) * 0.04);
+          }
+        }
 
-  // Partnership block interactivity
-  function copyEmail() {
-    navigator.clipboard.writeText('partnerships@lynkpay.app');
-    const toast = document.getElementById('copy-toast');
-    if (toast) {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translate(-50%, 0)';
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, 4px)';
-      }, 2000);
+        // Project 3D phone center front face to 2D screen coordinates
+        const phoneCenter = new THREE.Vector3(0, 0, 0.3);
+        phoneCenter.applyMatrix4(phone.matrixWorld);
+        phoneCenter.project(camera);
+
+        const x = (phoneCenter.x * .5 + .5) * container.clientWidth;
+        const y = (phoneCenter.y * -.5 + .5) * container.clientHeight;
+
+        // Calculate HTML scaling factor based on camera distance to match 3D dims
+        const vFOV = (camera.fov * Math.PI) / 180;
+        const visibleHeightAtZ0 = 2 * Math.tan(vFOV / 2) * camera.position.z;
+        const pixelsPerUnit = container.clientHeight / visibleHeightAtZ0;
+        
+        // CSS screen width is 240px. Let's make it span ~8.0 units of the phone width
+        const scale = ((8.0 * pixelsPerUnit) / 240) * phone.scale.x;
+
+        // Dynamic depth of field shadow effect
+        const tiltIntensity = Math.abs(phone.rotation.x) + Math.abs(phone.rotation.y);
+        const blurAmount = 14 + tiltIntensity * 40;
+        
+        overlay.style.boxShadow = `0px 24px ${blurAmount}px -12px rgba(0,0,0,0.25), inset 0 0 0 6px #1A1A1A, inset 0 0 0 7px rgba(255,255,255,0.1)`;
+        overlay.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale}) rotateY(${phone.rotation.y}rad) rotateX(${-phone.rotation.x}rad)`;
+        overlay.classList.remove('opacity-0');
+
+        renderer.render(scene, camera);
+      };
+      
+      let resizer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizer);
+        resizer = setTimeout(() => {
+          camera.aspect = container.clientWidth / container.clientHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(container.clientWidth, container.clientHeight);
+        }, 100);
+      });
+
+      animate();
     }
-  }
-  window.copyEmail = copyEmail;
-  document.querySelectorAll('.reveal').forEach((el, i) => {
-    el.style.animationDelay = `${i * 100}ms`;
-    io.observe(el);
-  });
-
-  // Payment Links 3D Tilt
-  const linkWrap = document.getElementById('links-card-wrap');
-  const linkShowcase = document.getElementById('links-showcase');
-  if (linkWrap && linkShowcase) {
-    linkShowcase.addEventListener('mousemove', (e) => {
-      const rect = linkShowcase.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      linkWrap.style.transform = `rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateZ(10px)`;
-    });
-    linkShowcase.addEventListener('mouseleave', () => {
-      linkWrap.style.transform = `rotateY(0deg) rotateX(0deg) translateZ(0px)`;
-    });
-  }
-</script>
+  </script>
 </body>
 </html>
